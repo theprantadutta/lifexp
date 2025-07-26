@@ -10,11 +10,14 @@
   - Configure proper asset folders for images, animations, and fonts
   - _Requirements: 1.1, 2.1, 3.1, 4.1, 5.1, 6.1, 7.1, 8.1, 9.1_
 
-- [ ] 2. Implement core data models and validation
+- [x] 2. Implement core data models and validation
+
   - **Objective**: Create robust, type-safe data models that represent the gamification system's core entities
   - **Main Goal**: Build the foundation for XP progression, task management, achievements, and world building with proper validation and business logic
   
-  - [ ] 2.1 Create Avatar data model with validation
+  - [x] 2.1 Create Avatar data model with validation
+
+
     - **Objective**: Establish the character progression system with XP, levels, and attributes
     - Write Avatar class with level, XP, attributes (strength, wisdom, intelligence), and appearance properties
     - Implement validation methods for XP calculations, level progression, and attribute bounds
@@ -22,7 +25,9 @@
 
     - _Requirements: 1.1, 1.3, 1.4, 1.5_
 
-  - [ ] 2.2 Create Task data model with category and streak support
+  - [x] 2.2 Create Task data model with category and streak support
+
+
     - **Objective**: Build the core task system that drives user engagement and XP rewards
     - Write Task class with type (daily/weekly/long-term), category (health/finance/work/custom), XP reward, and streak properties
     - Implement task validation, streak calculation logic, and XP reward determination
@@ -30,7 +35,9 @@
     - Create unit tests for Task model validation, streak calculations, and XP reward logic
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.6_
 
-  - [ ] 2.3 Create Achievement data model with unlock criteria
+  - [x] 2.3 Create Achievement data model with unlock criteria
+
+
     - **Objective**: Design the achievement system that provides long-term motivation and recognition
     - Write Achievement class with criteria, unlock status, badge properties, and achievement types
     - Implement achievement validation and criteria checking logic for different milestone types
@@ -38,7 +45,9 @@
     - Create unit tests for Achievement model validation and criteria evaluation
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6_
 
-  - [ ] 2.4 Create World and Progress data models
+  - [x] 2.4 Create World and Progress data models
+
+
     - **Objective**: Enable visual progress representation through world building and analytics tracking
     - Write WorldTile class with unlock requirements, tile types, and visual progression
     - Write ProgressEntry class for tracking daily/weekly progress, XP trends, and category analytics
@@ -46,20 +55,33 @@
     - Create unit tests for World and Progress model validation and calculation logic
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 6.1, 6.2, 6.3, 6.4, 6.5_
 
-- [ ] 3. Set up local database with Drift
+- [x] 3. Set up local database with Drift
+
+
+
+
+
   - **Objective**: Create a robust, offline-first database system that efficiently stores and retrieves all gamification data
   - **Main Goal**: Establish reliable local data persistence that supports complex queries, relationships, and fast performance for real-time gamification features
   
-  - [ ] 3.1 Create database schema and tables
+  - [x] 3.1 Create database schema and tables
+
     - **Objective**: Design a normalized database schema that supports all gamification features with proper relationships and constraints
     - Define Drift database class with all required tables (users, avatars, tasks, achievements, world_tiles, progress_entries)
     - Create proper foreign key relationships and indexes for optimal query performance
     - Implement database migrations and version management for future updates
     - Add database constraints for data integrity (XP bounds, level limits, etc.)
     - Create unit tests for database schema creation, migrations, and constraint validation
+
     - _Requirements: 7.1, 7.2_
 
-  - [ ] 3.2 Implement data access objects (DAOs)
+  - [x] 3.2 Implement data access objects (DAOs) without tests
+
+
+
+
+
+
     - **Objective**: Create efficient data access layer with optimized queries for gamification features
     - Create AvatarDao with CRUD operations, XP update methods, and level progression queries
     - Create TaskDao with CRUD operations, streak tracking, category filtering, and completion statistics
@@ -69,11 +91,11 @@
     - Write comprehensive unit tests for all DAO operations and edge cases
     - _Requirements: 1.1, 1.3, 1.5, 2.1, 2.2, 2.4, 2.6, 4.1, 4.5, 5.1, 5.2, 6.1, 6.2_
 
-- [ ] 4. Create repository layer for data management
+- [ ] 4. Create repository layer for data management without tests
   - **Objective**: Build a clean abstraction layer that handles business logic, caching, and data synchronization
   - **Main Goal**: Create repositories that encapsulate complex data operations and provide simple interfaces for BLoCs to consume
   
-  - [ ] 4.1 Implement Avatar repository with caching
+  - [ ] 4.1 Implement Avatar repository with caching without tests
     - **Objective**: Manage avatar progression, XP calculations, and attribute updates with efficient caching
     - Create AvatarRepository with methods for XP gain, level up calculations, and attribute increases
     - Implement intelligent local caching to minimize database queries during frequent XP updates
@@ -82,7 +104,7 @@
     - Write comprehensive unit tests for avatar repository operations and caching behavior
     - _Requirements: 1.3, 1.4, 1.5, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6_
 
-  - [ ] 4.2 Implement Task repository with streak management
+  - [ ] 4.2 Implement Task repository with streak management without tests
     - **Objective**: Handle complex task operations including streak tracking, XP rewards, and completion logic
     - Create TaskRepository with CRUD operations, category filtering, and advanced querying
     - Implement sophisticated streak calculation logic with grace periods and bonus multipliers
@@ -91,7 +113,7 @@
     - Write unit tests for task repository operations, streak management, and XP calculations
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.6_
 
-  - [ ] 4.3 Implement Achievement repository with unlock logic
+  - [ ] 4.3 Implement Achievement repository with unlock logic without tests
     - **Objective**: Manage achievement tracking, criteria evaluation, and unlock notifications
     - Create AchievementRepository with achievement checking, progress tracking, and unlocking
     - Implement flexible criteria evaluation system for different achievement types (streaks, totals, milestones)
@@ -100,7 +122,7 @@
     - Write unit tests for achievement repository operations and criteria evaluation logic
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6_
 
-  - [ ] 4.4 Implement World and Progress repositories
+  - [ ] 4.4 Implement World and Progress repositories without tests
     - **Objective**: Handle world progression, tile unlocking, and analytics data preparation
     - Create WorldRepository with tile unlock logic based on XP milestones and category progress
     - Create ProgressRepository with analytics aggregation and chart data preparation
@@ -109,11 +131,11 @@
     - Write unit tests for world and progress repository operations and analytics calculations
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 6.1, 6.2, 6.3, 6.4, 6.5_
 
-- [ ] 5. Implement BLoC state management
+- [ ] 5. Implement BLoC state management without tests
   - **Objective**: Create reactive state management that handles complex gamification logic and UI updates
   - **Main Goal**: Build BLoCs that manage state transitions, trigger animations, and coordinate between different systems
   
-  - [ ] 5.1 Create Avatar BLoC with XP and leveling logic
+  - [ ] 5.1 Create Avatar BLoC with XP and leveling logic without tests
     - **Objective**: Manage avatar progression, XP calculations, and character customization state
     - Write AvatarBloc with events for XP gain, level up, attribute increases, and customization changes
     - Implement state management for avatar progression with proper loading, success, and error states
@@ -122,7 +144,7 @@
     - Create comprehensive unit tests for AvatarBloc state transitions and XP calculations
     - _Requirements: 1.1, 1.3, 1.4, 1.5, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6_
 
-  - [ ] 5.2 Create Task BLoC with completion and streak tracking
+  - [ ] 5.2 Create Task BLoC with completion and streak tracking without tests
     - **Objective**: Handle task lifecycle, completion rewards, and streak maintenance with real-time updates
     - Write TaskBloc with events for task CRUD, completion, streak management, and category filtering
     - Implement state management for task lists, filtering, sorting, and completion animations
@@ -131,7 +153,7 @@
     - Create unit tests for TaskBloc state transitions, streak logic, and XP calculations
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6_
 
-  - [ ] 5.3 Create Achievement BLoC with unlock notifications
+  - [ ] 5.3 Create Achievement BLoC with unlock notifications without tests
     - **Objective**: Monitor achievement progress, handle unlocks, and trigger celebration animations
     - Write AchievementBloc with events for checking progress, unlocking achievements, and badge management
     - Implement state management for achievement progress tracking and celebration animations
@@ -140,7 +162,7 @@
     - Create unit tests for AchievementBloc state transitions and criteria evaluation
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6_
 
-  - [ ] 5.4 Create Progress and World BLoCs
+  - [ ] 5.4 Create Progress and World BLoCs without tests
     - **Objective**: Manage analytics data, world progression, and visual progress representation
     - Write ProgressBloc for analytics data aggregation, chart updates, and trend analysis
     - Write WorldBloc for tile unlocking, world progression, and customization management
@@ -149,7 +171,7 @@
     - Create unit tests for Progress and World BLoC state transitions and data calculations
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 6.1, 6.2, 6.3, 6.4, 6.5_
 
-- [ ] 6. Create core UI components and theming
+- [ ] 6. Create core UI components and theming without tests
   - [ ] 6.1 Implement comprehensive theming system with proper color schemes
     - **Objective**: Create a beautiful, consistent design system that supports both light and dark modes with proper Material 3 color schemes
     - Create LifeXPTheme class with primary, secondary, tertiary colors for both light and dark modes
@@ -160,7 +182,7 @@
     - Write widget tests for theme switching functionality and color consistency
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5_
 
-  - [ ] 6.2 Create reusable UI components with proper theming
+  - [ ] 6.2 Create reusable UI components with proper theming without tests
     - **Objective**: Build a library of consistent, animated UI components that enhance the gamification experience
     - Build XPProgressBar widget with smooth fill animations and proper theme colors
     - Build TaskCard widget with completion animations, category colors, and streak indicators
@@ -171,7 +193,7 @@
     - Write comprehensive widget tests for all reusable components and their animations
     - _Requirements: 1.5, 2.6, 3.5, 4.4, 5.1, 5.2_
 
-  - [ ] 6.3 Implement navigation structure with proper theming
+  - [ ] 6.3 Implement navigation structure with proper theming without tests
     - **Objective**: Create an intuitive navigation system that integrates seamlessly with the gamification theme and color scheme
     - Create bottom navigation bar with 5 tabs: Home, Tasks, Progress, World, Profile
     - Use proper primary and secondary colors from theme for selected/unselected states
@@ -182,11 +204,11 @@
     - Write widget tests for navigation functionality and theme consistency
     - _Requirements: 1.1, 2.1, 4.1, 5.1, 6.1_
 
-- [ ] 7. Build main application screens
+- [ ] 7. Build main application screens without tests
   - **Objective**: Create the core user interface screens that provide intuitive access to all gamification features
   - **Main Goal**: Build beautiful, functional screens that encourage daily engagement and showcase user progress effectively
   
-  - [ ] 7.1 Create Home screen with avatar and daily summary
+  - [ ] 7.1 Create Home screen with avatar and daily summary without tests
     - **Objective**: Design an engaging home screen that motivates users and provides quick access to daily activities
     - Build home screen layout with prominent avatar display, level indicator, and XP progress bar
     - Implement today's tasks summary with completion status and streak indicators
@@ -196,7 +218,7 @@
     - Write widget tests for home screen components, data display, and user interactions
     - _Requirements: 1.1, 1.5, 2.6, 5.1, 5.2_
 
-  - [ ] 7.2 Create Task management screen
+  - [ ] 7.2 Create Task management screen without tests
     - **Objective**: Build a comprehensive task management interface that makes creating and completing tasks enjoyable
     - Build task list with category filtering, sorting options, and search functionality
     - Implement add/edit task functionality with form validation and category selection
@@ -206,7 +228,7 @@
     - Write widget tests for task management functionality, form validation, and animations
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6_
 
-  - [ ] 7.3 Create Progress dashboard screen
+  - [ ] 7.3 Create Progress dashboard screen without tests
     - **Objective**: Provide comprehensive analytics and progress visualization that motivates continued engagement
     - Build XP charts using fl_chart for daily, weekly, monthly views with proper theme integration
     - Implement attribute progress bars with smooth animations and milestone indicators
@@ -216,7 +238,7 @@
     - Write widget tests for progress dashboard components, chart rendering, and data accuracy
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_
 
-  - [ ] 7.4 Create World screen with interactive map
+  - [ ] 7.4 Create World screen with interactive map without tests
     - **Objective**: Build an immersive world-building interface that visualizes long-term progress and achievements
     - Build pixel-art style world map with unlockable tiles and themed areas
     - Implement tile unlock animations, progress indicators, and interactive elements
@@ -226,7 +248,7 @@
     - Write widget tests for world screen interactions, tile unlocking, and customization features
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_
 
-  - [ ] 7.5 Create Profile screen with avatar customization
+  - [ ] 7.5 Create Profile screen with avatar customization without tests
     - **Objective**: Design a comprehensive profile interface that showcases achievements and allows character personalization
     - Build avatar customization interface with unlockable items, appearance options, and preview functionality
     - Implement achievement gallery with earned badges display and progress tracking
@@ -236,7 +258,7 @@
     - Write widget tests for profile screen functionality, customization features, and settings management
     - _Requirements: 1.1, 1.2, 1.4, 4.5, 8.1, 8.2, 8.3_
 
-- [ ] 8. Implement animation system
+- [ ] 8. Implement animation system without tests
   - **Objective**: Create engaging, smooth animations that enhance the gamification experience and provide satisfying feedback
   - **Main Goal**: Build a comprehensive animation system that celebrates achievements, provides visual feedback, and creates an immersive gaming experience
   
@@ -249,7 +271,7 @@
     - Write widget tests for animation triggers, completion, and proper cleanup
     - _Requirements: 1.3, 1.4, 4.4, 2.3_
 
-  - [ ] 8.2 Create interactive avatar animations with Rive
+  - [ ] 8.2 Create interactive avatar animations with Rive without tests
     - **Objective**: Bring the avatar to life with responsive animations that reflect character progression
     - Implement avatar idle animations with subtle movements and personality
     - Create attribute increase visual feedback animations (strength flex, wisdom glow, intelligence sparkle)
@@ -258,7 +280,7 @@
     - Write widget tests for avatar animation states and interaction responses
     - _Requirements: 1.1, 1.4, 1.5, 3.1, 3.2, 3.3, 3.4, 3.5_
 
-  - [ ] 8.3 Implement progress animations and transitions
+  - [ ] 8.3 Implement progress animations and transitions without tests
     - **Objective**: Create smooth, satisfying progress visualizations that make advancement feel rewarding
     - Create smooth XP bar filling animations with easing curves and color transitions
     - Implement attribute bar growth animations with gradient effects and milestone indicators
@@ -281,7 +303,7 @@
     - Write comprehensive unit tests for notification scheduling logic and edge cases
     - _Requirements: 9.1, 9.2, 9.5_
 
-  - [ ] 9.2 Create achievement and streak notifications
+  - [ ] 9.2 Create achievement and streak notifications without tests
     - **Objective**: Provide immediate positive reinforcement for achievements and gentle streak maintenance reminders
     - Implement immediate achievement unlock notifications with celebration messaging
     - Add streak warning notifications before breaks with encouraging language
@@ -291,7 +313,7 @@
     - Write unit tests for notification content generation, timing logic, and user preference handling
     - _Requirements: 9.2, 9.3, 9.4, 9.5_
 
-- [ ] 10. Implement offline support and data sync
+- [ ] 10. Implement offline support and data sync without tests
   - **Objective**: Ensure the app works seamlessly offline while providing reliable cloud backup and multi-device sync
   - **Main Goal**: Create a robust offline-first architecture that never loses user progress and syncs intelligently
   
@@ -305,7 +327,7 @@
     - Write comprehensive unit tests for offline data operations and sync queue management
     - _Requirements: 7.1, 7.2, 7.4_
 
-  - [ ] 10.2 Implement Firebase cloud sync (optional)
+  - [ ] 10.2 Implement Firebase cloud sync (optional) without tests
     - **Objective**: Provide secure cloud backup and multi-device synchronization for user data
     - Set up Firebase project with proper security rules and authentication
     - Create cloud sync service with intelligent conflict resolution and merge strategies
@@ -315,11 +337,11 @@
     - Write integration tests for sync operations, conflict resolution, and error handling
     - _Requirements: 7.2, 7.3, 7.4_
 
-- [ ] 11. Add accessibility features
+- [ ] 11. Add accessibility features without tests
   - **Objective**: Make the app inclusive and usable for users with diverse abilities and needs
   - **Main Goal**: Ensure full accessibility compliance while maintaining the engaging gamification experience
   
-  - [ ] 11.1 Implement screen reader support
+  - [ ] 11.1 Implement screen reader support without tests
     - **Objective**: Provide comprehensive screen reader support that makes all gamification features accessible
     - Add semantic labels and hints to all interactive elements including XP bars, task cards, and achievements
     - Implement proper focus management for navigation with logical tab order
@@ -329,7 +351,7 @@
     - Write accessibility tests using flutter_test accessibility features and semantic validation
     - _Requirements: 1.1, 2.1, 4.1, 5.1, 6.1_
 
-  - [ ] 11.2 Add high contrast and font scaling support
+  - [ ] 11.2 Add high contrast and font scaling support without tests
     - **Objective**: Support users with visual impairments through enhanced contrast and flexible text sizing
     - Implement high contrast theme variants with proper color ratios and .withValues(alpha: 1.0) for maximum visibility
     - Add support for system font size scaling with responsive layout adjustments
@@ -339,7 +361,7 @@
     - Write widget tests for accessibility features, theme variants, and responsive scaling
     - _Requirements: 8.1, 8.2, 8.3, 8.4_
 
-- [ ] 12. Create comprehensive test suite
+<!-- - [ ] 12. Create comprehensive test suite without tests
   - **Objective**: Ensure app reliability, performance, and quality through thorough testing coverage
   - **Main Goal**: Build confidence in the app's stability and provide regression protection for future development
   
@@ -361,13 +383,13 @@
     - Add battery usage monitoring tests for background sync and notification scheduling
     - Create stress tests for rapid task completion and XP calculations
     - Test app behavior under low memory and storage conditions
-    - _Requirements: 7.1, 7.2, 7.3, 7.4_
+    - _Requirements: 7.1, 7.2, 7.3, 7.4_ -->
 
-- [ ] 13. Polish and optimization
+- [ ] 13. Polish and optimization without tests
   - **Objective**: Deliver a polished, high-performance app that provides an exceptional user experience
   - **Main Goal**: Optimize performance, add final touches, and ensure the app feels professional and engaging
   
-  - [ ] 13.1 Optimize app performance and memory usage
+  - [ ] 13.1 Optimize app performance and memory usage without tests
     - **Objective**: Ensure smooth performance across all devices and usage scenarios
     - Implement intelligent image caching and optimization for avatar assets and world graphics
     - Add lazy loading for large data sets, task lists, and achievement galleries
@@ -377,7 +399,7 @@
     - Add performance monitoring and crash reporting integration
     - _Requirements: 1.1, 5.1, 6.1, 8.1_
 
-  - [ ] 13.2 Final UI polish and user experience improvements
+  - [ ] 13.2 Final UI polish and user experience improvements without tests
     - **Objective**: Add finishing touches that make the app feel premium and engaging
     - Add haptic feedback for task completion, level ups, and achievement unlocks
     - Implement smooth loading states and skeleton screens with proper theme integration
