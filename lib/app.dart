@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-// Dummy cubit for temporary use
-class DummyCubit extends Cubit<String> {
-  DummyCubit() : super('dummy');
-}
+import 'shared/blocs/navigation/navigation_cubit.dart';
+import 'shared/blocs/theme/theme_barrel.dart';
+import 'shared/themes/lifexp_theme.dart';
+import 'shared/widgets/navigation/app_shell.dart';
 
 /// The main application widget that sets up the app structure,
 /// theme, and global providers.
@@ -14,19 +14,17 @@ class LifeExpApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) => MultiBlocProvider(
     providers: [
-      // Temporary dummy provider to prevent assertion error
-      BlocProvider<DummyCubit>(create: (_) => DummyCubit()),
-      // Global BLoCs will be added here
+      BlocProvider<NavigationCubit>(create: (_) => NavigationCubit()),
+      BlocProvider<ThemeBloc>(create: (_) => ThemeBloc()),
     ],
-    child: MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'LifeExp',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const Scaffold(
-        body: Center(child: Text('LifeExp - Gamification App')),
+    child: BlocBuilder<ThemeBloc, ThemeState>(
+      builder: (context, themeState) => MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'LifeXP',
+        theme: themeState.isDarkMode
+            ? LifeXPTheme.darkTheme
+            : LifeXPTheme.lightTheme,
+        home: const AppShell(),
       ),
     ),
   );
