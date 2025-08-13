@@ -2,14 +2,20 @@ import 'dart:async';
 
 import 'package:drift/drift.dart';
 
+import '../../shared/services/offline_data_manager.dart';
 import '../database/database.dart';
 import '../models/task.dart';
 
-/// Repository for managing task data with advanced streak management
+/// Repository for managing task data with advanced streak management and offline support
 class TaskRepository {
-  TaskRepository({required LifeXPDatabase database}) : _database = database;
+  TaskRepository({
+    required LifeXPDatabase database,
+    OfflineDataManager? offlineManager,
+  }) : _database = database,
+       _offlineManager = offlineManager;
 
   final LifeXPDatabase _database;
+  final OfflineDataManager? _offlineManager;
 
   // Cache for frequently accessed task data
   final Map<String, List<Task>> _taskCache = {};
@@ -24,18 +30,34 @@ class TaskRepository {
 
   /// Gets all tasks for a user with caching
   Future<List<Task>> getTasksByUserId(String userId) async {
-    // Check cache first
-    final cachedTasks = _getCachedTasks(userId);
-    if (cachedTasks != null) {
-      return cachedTasks;
+    try {
+      print('TaskRepository: Loading tasks for user $userId');
+
+      // Check cache first
+      final cachedTasks = _getCachedTasks(userId);
+      if (cachedTasks != null) {
+        print('TaskRepository: Returning ${cachedTasks.length} cached tasks');
+        return cachedTasks;
+      }
+
+      // Fetch from database
+      print('TaskRepository: Fetching tasks from database');
+      final taskDataList = await _database.taskDao.getTasksByUserId(userId);
+      print('TaskRepository: Found ${taskDataList.length} tasks in database');
+
+      final tasks = taskDataList.map(_convertFromData).toList();
+
+      _cacheTasks(userId, tasks);
+      print(
+        'TaskRepository: Successfully loaded and cached ${tasks.length} tasks',
+      );
+      return tasks;
+    } catch (e, stackTrace) {
+      print('TaskRepository: Error loading tasks for user $userId');
+      print('Error: $e');
+      print('Stack trace: $stackTrace');
+      rethrow;
     }
-
-    // Fetch from database
-    final taskDataList = await _database.taskDao.getTasksByUserId(userId);
-    final tasks = taskDataList.map(_convertFromData).toList();
-
-    _cacheTasks(userId, tasks);
-    return tasks;
   }
 
   /// Gets task by ID with caching
@@ -53,7 +75,7 @@ class TaskRepository {
     return _convertFromData(taskData);
   }
 
-  /// Creates a new task
+  /// Creates a new task with offline support
   Future<Task> createTask({
     required String userId,
     required String title,
@@ -74,47 +96,101 @@ class TaskRepository {
       dueDate: dueDate,
     );
 
-    final companion = _convertToCompanion(task, userId);
-    await _database.taskDao.createTask(companion);
+    try {
+      // Save to local database first (offline-first approach)
+      final companion = _convertToCompanion(task, userId);
+      await _database.taskDao.createTask(companion);
 
-    // Invalidate cache and notify listeners
-    _invalidateUserCache(userId);
-    await _notifyTaskListUpdate(userId);
+      // Queue for sync if offline manager is available
+      await _queueSyncOperation(
+        SyncOperation(
+          id: '${taskId}_create_${DateTime.now().millisecondsSinceEpoch}',
+          entityType: 'task',
+          entityId: taskId,
+          operationType: SyncOperationType.create,
+          data: task.toMap()..['userId'] = userId,
+          timestamp: DateTime.now(),
+        ),
+      );
 
-    return task;
-  }
-
-  /// Updates task with validation
-  Future<Task?> updateTask(Task task, String userId) async {
-    if (!task.isValid) return null;
-
-    final companion = _convertToCompanion(task, userId);
-    final success = await _database.taskDao.updateTask(companion);
-
-    if (success) {
       // Invalidate cache and notify listeners
       _invalidateUserCache(userId);
       await _notifyTaskListUpdate(userId);
-      _notifySingleTaskUpdate(task);
-      return task;
-    }
 
-    return null;
+      return task;
+    } catch (e) {
+      print('TaskRepository: Error creating task: $e');
+      rethrow;
+    }
   }
 
-  /// Completes task with advanced streak management
+  /// Updates task with validation and offline support
+  Future<Task?> updateTask(Task task, String userId) async {
+    if (!task.isValid) return null;
+
+    try {
+      // Update local database first
+      final companion = _convertToCompanion(task, userId);
+      final success = await _database.taskDao.updateTask(companion);
+
+      if (success) {
+        // Queue for sync
+        await _queueSyncOperation(
+          SyncOperation(
+            id: '${task.id}_update_${DateTime.now().millisecondsSinceEpoch}',
+            entityType: 'task',
+            entityId: task.id,
+            operationType: SyncOperationType.update,
+            data: task.toMap()..['userId'] = userId,
+            timestamp: DateTime.now(),
+          ),
+        );
+
+        // Invalidate cache and notify listeners
+        _invalidateUserCache(userId);
+        await _notifyTaskListUpdate(userId);
+        _notifySingleTaskUpdate(task);
+        return task;
+      }
+
+      return null;
+    } catch (e) {
+      print('TaskRepository: Error updating task: $e');
+      return null;
+    }
+  }
+
+  /// Completes task with advanced streak management and offline support
   Future<Task?> completeTask(String taskId) async {
-    final taskData = await _database.taskDao.completeTask(taskId);
-    if (taskData == null) return null;
+    try {
+      // Complete in local database first
+      final taskData = await _database.taskDao.completeTask(taskId);
+      if (taskData == null) return null;
 
-    final completedTask = _convertFromData(taskData);
+      final completedTask = _convertFromData(taskData);
 
-    // Invalidate cache and notify listeners
-    _invalidateAllCaches();
-    await _notifyTaskListUpdate(taskData.userId);
-    _notifySingleTaskUpdate(completedTask);
+      // Queue for sync
+      await _queueSyncOperation(
+        SyncOperation(
+          id: '${taskId}_complete_${DateTime.now().millisecondsSinceEpoch}',
+          entityType: 'task',
+          entityId: taskId,
+          operationType: SyncOperationType.update,
+          data: completedTask.toMap()..['userId'] = taskData.userId,
+          timestamp: DateTime.now(),
+        ),
+      );
 
-    return completedTask;
+      // Invalidate cache and notify listeners
+      _invalidateAllCaches();
+      await _notifyTaskListUpdate(taskData.userId);
+      _notifySingleTaskUpdate(completedTask);
+
+      return completedTask;
+    } catch (e) {
+      print('TaskRepository: Error completing task: $e');
+      return null;
+    }
   }
 
   /// Batch complete multiple tasks with streak optimization
@@ -277,36 +353,28 @@ class TaskRepository {
   }
 
   /// Gets comprehensive task statistics
-  Future<Map<String, dynamic>> getTaskStats(String userId) async {
-    return _database.taskDao.getTaskStats(userId);
-  }
+  Future<Map<String, dynamic>> getTaskStats(String userId) async =>
+      _database.taskDao.getTaskStats(userId);
 
   /// Gets task statistics by category
   Future<List<Map<String, dynamic>>> getTaskStatsByCategory(
     String userId,
-  ) async {
-    return _database.taskDao.getTaskStatsByCategory(userId);
-  }
+  ) async => _database.taskDao.getTaskStatsByCategory(userId);
 
   /// Gets task completion trend data
   Future<List<Map<String, dynamic>>> getTaskCompletionTrend(
     String userId, {
     int days = 30,
-  }) async {
-    return _database.taskDao.getTaskCompletionTrend(userId, days: days);
-  }
+  }) async => _database.taskDao.getTaskCompletionTrend(userId, days: days);
 
   /// Gets streak analytics
-  Future<List<Map<String, dynamic>>> getStreakAnalytics(String userId) async {
-    return _database.taskDao.getStreakAnalytics(userId);
-  }
+  Future<List<Map<String, dynamic>>> getStreakAnalytics(String userId) async =>
+      _database.taskDao.getStreakAnalytics(userId);
 
   /// Gets category performance metrics
   Future<List<Map<String, dynamic>>> getCategoryPerformanceMetrics(
     String userId,
-  ) async {
-    return _database.taskDao.getCategoryPerformanceMetrics(userId);
-  }
+  ) async => _database.taskDao.getCategoryPerformanceMetrics(userId);
 
   /// Calculates streak bonus XP
   int calculateStreakBonus({
@@ -567,47 +635,54 @@ class TaskRepository {
   }
 
   /// Converts database data to Task model
-  Task _convertFromData(TaskData data) {
-    return Task(
-      id: data.id,
-      title: data.title,
-      description: data.description,
-      type: TaskType.values.byName(data.type),
-      category: TaskCategory.values.byName(data.category),
-      xpReward: data.xpReward,
-      difficulty: data.difficulty,
-      dueDate: data.dueDate,
-      isCompleted: data.isCompleted,
-      streakCount: data.streakCount,
-      lastCompletedDate: data.lastCompletedDate,
-      createdAt: data.createdAt,
-      updatedAt: data.updatedAt,
-    );
-  }
+  Task _convertFromData(TaskData data) => Task(
+    id: data.id,
+    title: data.title,
+    description: data.description,
+    type: TaskType.values.byName(data.type),
+    category: TaskCategory.values.byName(data.category),
+    xpReward: data.xpReward,
+    difficulty: data.difficulty,
+    dueDate: data.dueDate,
+    isCompleted: data.isCompleted,
+    streakCount: data.streakCount,
+    lastCompletedDate: data.lastCompletedDate,
+    createdAt: data.createdAt,
+    updatedAt: data.updatedAt,
+  );
 
   /// Converts Task model to database companion
-  TasksCompanion _convertToCompanion(Task task, String userId) {
-    return TasksCompanion.insert(
-      id: task.id,
-      userId: userId,
-      title: task.title,
-      description: Value(task.description),
-      type: task.type.name,
-      category: task.category.name,
-      xpReward: task.xpReward,
-      difficulty: task.difficulty,
-      dueDate: Value(task.dueDate),
-      isCompleted: Value(task.isCompleted),
-      streakCount: Value(task.streakCount),
-      lastCompletedDate: Value(task.lastCompletedDate),
-      createdAt: task.createdAt,
-      updatedAt: task.updatedAt,
-    );
-  }
+  TasksCompanion _convertToCompanion(Task task, String userId) =>
+      TasksCompanion.insert(
+        id: task.id,
+        userId: userId,
+        title: task.title,
+        description: Value(task.description),
+        type: task.type.name,
+        category: task.category.name,
+        xpReward: task.xpReward,
+        difficulty: task.difficulty,
+        dueDate: Value(task.dueDate),
+        isCompleted: Value(task.isCompleted),
+        streakCount: Value(task.streakCount),
+        lastCompletedDate: Value(task.lastCompletedDate),
+        createdAt: task.createdAt,
+        updatedAt: task.updatedAt,
+      );
 
   /// Generates unique ID
-  String _generateId() {
-    return DateTime.now().millisecondsSinceEpoch.toString();
+  String _generateId() => DateTime.now().millisecondsSinceEpoch.toString();
+
+  /// Queue sync operation for offline support
+  Future<void> _queueSyncOperation(SyncOperation operation) async {
+    if (_offlineManager == null) return;
+    
+    try {
+      await _offlineManager.queueSyncOperation(operation);
+    } catch (e) {
+      print('TaskRepository: Failed to queue sync operation: $e');
+      // Continue execution - offline support is not critical for core functionality
+    }
   }
 }
 

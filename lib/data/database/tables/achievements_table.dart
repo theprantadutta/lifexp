@@ -47,7 +47,7 @@ class Achievements extends Table {
   List<String> get customConstraints => [
     'CHECK (length(title) >= 1 AND length(title) <= 100)',
     'CHECK (length(description) >= 1 AND length(description) <= 500)',
-    'CHECK (achievement_type IN ("streak", "total", "milestone", "category", "level", "special"))',
+    "CHECK (achievement_type IN ('streak', 'total', 'milestone', 'category', 'level', 'special'))",
     'CHECK (progress >= 0)',
     'CHECK (length(icon_path) > 0)',
   ];

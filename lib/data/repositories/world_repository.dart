@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 
 import '../database/database.dart';
-import '../models/world.dart';
+import '../models/world_tile.dart';
 
 /// Repository for managing world data with tile unlocking logic
 class WorldRepository {
@@ -116,8 +116,8 @@ class WorldRepository {
     required String imagePath,
     required TileType type,
     required int unlockRequirement,
-    required int positionX,
-    required int positionY,
+    required int x,
+    required int y,
     String description = '',
     String? unlockCategory,
     Map<String, dynamic> customProperties = const {},
@@ -126,14 +126,11 @@ class WorldRepository {
     final tile = WorldTile.create(
       id: tileId,
       name: name,
-      imagePath: imagePath,
       type: type,
       unlockRequirement: unlockRequirement,
-      positionX: positionX,
-      positionY: positionY,
+      x: x,
+      y: y,
       description: description,
-      unlockCategory: unlockCategory,
-      customProperties: customProperties,
     );
 
     final companion = _convertToCompanion(tile, userId);
@@ -159,10 +156,7 @@ class WorldRepository {
     }
 
     // Validate unlock conditions
-    if (!currentTile.canUnlock(
-      currentXP: currentXP,
-      categoryProgress: categoryProgress,
-    )) {
+    if (!currentTile.canUnlock(currentXP, categoryProgress)) {
       return null;
     }
 
@@ -293,42 +287,30 @@ class WorldRepository {
   }
 
   /// Gets world statistics
-  Future<Map<String, dynamic>> getWorldStats(String userId) async {
-    return _database.worldDao.getWorldStats(userId);
-  }
+  Future<Map<String, dynamic>> getWorldStats(String userId) async => _database.worldDao.getWorldStats(userId);
 
   /// Gets world progression data
-  Future<List<Map<String, dynamic>>> getWorldProgression(String userId) async {
-    return _database.worldDao.getWorldProgression(userId);
-  }
+  Future<List<Map<String, dynamic>>> getWorldProgression(String userId) async => _database.worldDao.getWorldProgression(userId);
 
   /// Gets world map data optimized for rendering
-  Future<List<Map<String, dynamic>>> getWorldMapData(String userId) async {
-    return _database.worldDao.getWorldMapData(userId);
-  }
+  Future<List<Map<String, dynamic>>> getWorldMapData(String userId) async => _database.worldDao.getWorldMapData(userId);
 
   /// Gets world completion percentage
-  Future<double> getWorldCompletionPercentage(String userId) async {
-    return _database.worldDao.getWorldCompletionPercentage(userId);
-  }
+  Future<double> getWorldCompletionPercentage(String userId) async => _database.worldDao.getWorldCompletionPercentage(userId);
 
   /// Gets world analytics data
-  Future<List<Map<String, dynamic>>> getWorldAnalytics(String userId) async {
-    return _database.worldDao.getWorldAnalytics(userId);
-  }
+  Future<List<Map<String, dynamic>>> getWorldAnalytics(String userId) async => _database.worldDao.getWorldAnalytics(userId);
 
   /// Gets unlock eligibility report
   Future<List<Map<String, dynamic>>> getUnlockEligibilityReport(
     String userId,
     int currentXP,
     Map<String, int> categoryProgress,
-  ) async {
-    return _database.worldDao.getUnlockEligibilityReport(
+  ) async => _database.worldDao.getUnlockEligibilityReport(
       userId,
       currentXP,
       categoryProgress,
     );
-  }
 
   /// Creates default world layout for new users
   Future<void> createDefaultWorld(String userId) async {
@@ -338,13 +320,11 @@ class WorldRepository {
       final tile = WorldTile.create(
         id: _generateId(),
         name: tileData['name'] as String,
-        imagePath: tileData['imagePath'] as String,
         type: tileData['type'] as TileType,
         unlockRequirement: tileData['unlockRequirement'] as int,
-        positionX: tileData['positionX'] as int,
-        positionY: tileData['positionY'] as int,
+        x: tileData['x'] as int,
+        y: tileData['y'] as int,
         description: tileData['description'] as String? ?? '',
-        unlockCategory: tileData['unlockCategory'] as String?,
       );
       return _convertToCompanion(tile, userId);
     }).toList();
@@ -362,7 +342,7 @@ class WorldRepository {
   ) {
     final placements = <Map<String, int>>[];
     final occupiedPositions = existingTiles
-        .map((tile) => '${tile.positionX},${tile.positionY}')
+        .map((tile) => '${tile.x},${tile.y}')
         .toSet();
 
     // Simple spiral placement algorithm
@@ -530,16 +510,15 @@ class WorldRepository {
   }
 
   /// Generates default world layout
-  List<Map<String, dynamic>> _generateDefaultWorldLayout() {
-    return [
+  List<Map<String, dynamic>> _generateDefaultWorldLayout() => [
       // Starting area - always unlocked
       {
         'name': 'Home Base',
         'imagePath': 'assets/images/world/home_base.png',
         'type': TileType.building,
         'unlockRequirement': 0,
-        'positionX': 5,
-        'positionY': 5,
+        'x': 5,
+        'y': 5,
         'description': 'Your starting point in the world',
       },
 
@@ -549,32 +528,32 @@ class WorldRepository {
         'imagePath': 'assets/images/world/grass_1.png',
         'type': TileType.grass,
         'unlockRequirement': 50,
-        'positionX': 4,
-        'positionY': 5,
+        'x': 4,
+        'y': 5,
       },
       {
         'name': 'Peaceful Field',
         'imagePath': 'assets/images/world/grass_2.png',
         'type': TileType.grass,
         'unlockRequirement': 100,
-        'positionX': 6,
-        'positionY': 5,
+        'x': 6,
+        'y': 5,
       },
       {
         'name': 'Sunny Patch',
         'imagePath': 'assets/images/world/grass_3.png',
         'type': TileType.grass,
         'unlockRequirement': 150,
-        'positionX': 5,
-        'positionY': 4,
+        'x': 5,
+        'y': 4,
       },
       {
         'name': 'Flower Garden',
         'imagePath': 'assets/images/world/grass_4.png',
         'type': TileType.grass,
         'unlockRequirement': 200,
-        'positionX': 5,
-        'positionY': 6,
+        'x': 5,
+        'y': 6,
       },
 
       // Forest area - health category
@@ -583,8 +562,8 @@ class WorldRepository {
         'imagePath': 'assets/images/world/forest_1.png',
         'type': TileType.forest,
         'unlockRequirement': 300,
-        'positionX': 3,
-        'positionY': 5,
+        'x': 3,
+        'y': 5,
         'unlockCategory': 'health',
       },
       {
@@ -592,8 +571,8 @@ class WorldRepository {
         'imagePath': 'assets/images/world/forest_2.png',
         'type': TileType.forest,
         'unlockRequirement': 500,
-        'positionX': 2,
-        'positionY': 5,
+        'x': 2,
+        'y': 5,
         'unlockCategory': 'health',
       },
 
@@ -603,8 +582,8 @@ class WorldRepository {
         'imagePath': 'assets/images/world/mountain_1.png',
         'type': TileType.mountain,
         'unlockRequirement': 400,
-        'positionX': 7,
-        'positionY': 5,
+        'x': 7,
+        'y': 5,
         'unlockCategory': 'work',
       },
       {
@@ -612,8 +591,8 @@ class WorldRepository {
         'imagePath': 'assets/images/world/mountain_2.png',
         'type': TileType.mountain,
         'unlockRequirement': 800,
-        'positionX': 8,
-        'positionY': 5,
+        'x': 8,
+        'y': 5,
         'unlockCategory': 'work',
       },
 
@@ -623,8 +602,8 @@ class WorldRepository {
         'imagePath': 'assets/images/world/water_1.png',
         'type': TileType.water,
         'unlockRequirement': 350,
-        'positionX': 5,
-        'positionY': 3,
+        'x': 5,
+        'y': 3,
         'unlockCategory': 'finance',
       },
       {
@@ -632,8 +611,8 @@ class WorldRepository {
         'imagePath': 'assets/images/world/water_2.png',
         'type': TileType.water,
         'unlockRequirement': 600,
-        'positionX': 5,
-        'positionY': 2,
+        'x': 5,
+        'y': 2,
         'unlockCategory': 'finance',
       },
 
@@ -643,16 +622,16 @@ class WorldRepository {
         'imagePath': 'assets/images/world/city_1.png',
         'type': TileType.city,
         'unlockRequirement': 1000,
-        'positionX': 6,
-        'positionY': 4,
+        'x': 6,
+        'y': 4,
       },
       {
         'name': 'Grand City',
         'imagePath': 'assets/images/world/city_2.png',
         'type': TileType.city,
         'unlockRequirement': 2000,
-        'positionX': 7,
-        'positionY': 4,
+        'x': 7,
+        'y': 4,
       },
 
       // Special tiles - very high requirements
@@ -661,21 +640,20 @@ class WorldRepository {
         'imagePath': 'assets/images/world/special_1.png',
         'type': TileType.special,
         'unlockRequirement': 5000,
-        'positionX': 5,
-        'positionY': 7,
+        'x': 5,
+        'y': 7,
         'description': 'A mysterious portal to unknown realms',
       },
       {
-        'name': 'Dragon\'s Lair',
+        'name': "Dragon's Lair",
         'imagePath': 'assets/images/world/special_2.png',
         'type': TileType.special,
         'unlockRequirement': 10000,
-        'positionX': 9,
-        'positionY': 6,
-        'description': 'The legendary dragon\'s dwelling',
+        'x': 9,
+        'y': 6,
+        'description': "The legendary dragon's dwelling",
       },
     ];
-  }
 
   /// Converts database data to WorldTile model
   WorldTile _convertFromData(WorldTileData data) {
@@ -687,45 +665,38 @@ class WorldRepository {
       id: data.id,
       name: data.name,
       description: data.description,
-      imagePath: data.imagePath,
       type: TileType.values.byName(data.tileType),
       isUnlocked: data.isUnlocked,
       unlockRequirement: data.unlockRequirement,
-      unlockCategory: data.unlockCategory,
-      positionX: data.positionX,
-      positionY: data.positionY,
-      unlockedAt: data.unlockedAt,
-      customProperties: customProperties,
-      createdAt: data.createdAt,
-      updatedAt: data.updatedAt,
+      x: data.positionX, // Map from database field
+      y: data.positionY, // Map from database field
+      rewards: [], // Default empty list
+      customizations: customProperties,
     );
   }
 
   /// Converts WorldTile model to database companion
   WorldTilesCompanion _convertToCompanion(WorldTile tile, String userId) {
+    final now = DateTime.now();
     return WorldTilesCompanion.insert(
       id: tile.id,
       userId: userId,
       name: tile.name,
       description: Value(tile.description),
-      imagePath: tile.imagePath,
+      imagePath: 'assets/images/world/${tile.type.name}.png', // Default image path
       tileType: tile.type.name,
       isUnlocked: Value(tile.isUnlocked),
       unlockRequirement: tile.unlockRequirement,
-      unlockCategory: Value(tile.unlockCategory),
-      positionX: tile.positionX,
-      positionY: tile.positionY,
-      unlockedAt: Value(tile.unlockedAt),
-      customProperties: Value(json.encode(tile.customProperties)),
-      createdAt: tile.createdAt,
-      updatedAt: tile.updatedAt,
+      positionX: tile.x, // Map to database field
+      positionY: tile.y, // Map to database field
+      customProperties: Value(json.encode(tile.customizations)),
+      createdAt: now,
+      updatedAt: now,
     );
   }
 
   /// Generates unique ID
-  String _generateId() {
-    return DateTime.now().millisecondsSinceEpoch.toString();
-  }
+  String _generateId() => DateTime.now().millisecondsSinceEpoch.toString();
 }
 
 /// Extension to add firstOrNull method

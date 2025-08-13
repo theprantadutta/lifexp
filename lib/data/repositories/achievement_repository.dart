@@ -3,15 +3,21 @@ import 'dart:convert';
 
 import 'package:drift/drift.dart';
 
+import '../../shared/services/offline_manager.dart';
 import '../database/database.dart';
 import '../models/achievement.dart';
+import '../models/sync_operation.dart';
 
 /// Repository for managing achievement data with flexible unlock logic
 class AchievementRepository {
-  AchievementRepository({required LifeXPDatabase database})
-    : _database = database;
+  AchievementRepository({
+    required LifeXPDatabase database,
+    OfflineManager? offlineManager,
+  }) : _database = database,
+       _offlineManager = offlineManager ?? OfflineManager();
 
   final LifeXPDatabase _database;
+  final OfflineManager _offlineManager;
 
   // Cache for achievement data
   final Map<String, List<Achievement>> _achievementCache = {};
@@ -114,6 +120,15 @@ class AchievementRepository {
 
     final companion = _convertToCompanion(achievement, userId);
     await _database.achievementDao.createAchievement(companion);
+
+    // Queue for sync
+    await _queueSyncOperation(
+      SyncOperation.create(
+        entityType: 'achievement',
+        entityId: achievementId,
+        data: achievement.toMap()..['userId'] = userId,
+      ),
+    );
 
     // Invalidate cache and notify listeners
     _invalidateUserCache(userId);
@@ -317,9 +332,7 @@ class AchievementRepository {
   }
 
   /// Gets achievement statistics
-  Future<Map<String, dynamic>> getAchievementStats(String userId) async {
-    return _database.achievementDao.getAchievementStats(userId);
-  }
+  Future<Map<String, dynamic>> getAchievementStats(String userId) async => _database.achievementDao.getAchievementStats(userId);
 
   /// Gets recent achievement unlocks
   Future<List<Achievement>> getRecentUnlocks(
@@ -336,9 +349,7 @@ class AchievementRepository {
   /// Gets progress monitoring data
   Future<List<Map<String, dynamic>>> getProgressMonitoring(
     String userId,
-  ) async {
-    return _database.achievementDao.getProgressMonitoring(userId);
-  }
+  ) async => _database.achievementDao.getProgressMonitoring(userId);
 
   /// Creates default achievements for a new user
   Future<void> createDefaultAchievements(String userId) async {
@@ -606,9 +617,7 @@ class AchievementRepository {
   int _calculateMilestoneProgress(
     AchievementCriteria criteria,
     Map<String, dynamic> userStats,
-  ) {
-    return userStats['totalXP'] as int? ?? 0;
-  }
+  ) => userStats['totalXP'] as int? ?? 0;
 
   /// Calculates category progress
   int _calculateCategoryProgress(
@@ -625,9 +634,7 @@ class AchievementRepository {
   int _calculateLevelProgress(
     AchievementCriteria criteria,
     Map<String, dynamic> userStats,
-  ) {
-    return userStats['level'] as int? ?? 1;
-  }
+  ) => userStats['level'] as int? ?? 1;
 
   /// Calculates special progress
   int _calculateSpecialProgress(
@@ -653,8 +660,7 @@ class AchievementRepository {
   }
 
   /// Gets default achievements for new users
-  List<Map<String, dynamic>> _getDefaultAchievements() {
-    return [
+  List<Map<String, dynamic>> _getDefaultAchievements() => [
       {
         'title': 'First Steps',
         'description': 'Complete your first task',
@@ -726,7 +732,6 @@ class AchievementRepository {
         'criteria': AchievementCriteria.level(50),
       },
     ];
-  }
 
   /// Converts database data to Achievement model
   Achievement _convertFromData(AchievementData data) {
@@ -752,8 +757,7 @@ class AchievementRepository {
   AchievementsCompanion _convertToCompanion(
     Achievement achievement,
     String userId,
-  ) {
-    return AchievementsCompanion.insert(
+  ) => AchievementsCompanion.insert(
       id: achievement.id,
       userId: userId,
       achievementType: achievement.type.name,
@@ -767,11 +771,18 @@ class AchievementRepository {
       createdAt: achievement.createdAt,
       updatedAt: achievement.updatedAt,
     );
-  }
 
   /// Generates unique ID
-  String _generateId() {
-    return DateTime.now().millisecondsSinceEpoch.toString();
+  String _generateId() => DateTime.now().millisecondsSinceEpoch.toString();
+
+  /// Queue sync operation for offline support
+  Future<void> _queueSyncOperation(SyncOperation operation) async {
+    try {
+      await _offlineManager.queueSyncOperation(operation);
+    } catch (e) {
+      print('AchievementRepository: Failed to queue sync operation: $e');
+      // Continue execution - offline support is not critical for core functionality
+    }
   }
 }
 

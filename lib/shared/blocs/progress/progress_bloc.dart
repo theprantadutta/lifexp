@@ -55,7 +55,6 @@ class ProgressBloc extends Bloc<ProgressEvent, ProgressState> {
       emit(
         ProgressError(
           message: 'Failed to load progress entries: ${e.toString()}',
-          errorType: ProgressErrorType.general,
         ),
       );
     }
@@ -101,7 +100,6 @@ class ProgressBloc extends Bloc<ProgressEvent, ProgressState> {
           progressEntries: currentState is ProgressLoaded
               ? currentState.progressEntries
               : null,
-          errorType: ProgressErrorType.general,
         ),
       );
     }
@@ -133,7 +131,6 @@ class ProgressBloc extends Bloc<ProgressEvent, ProgressState> {
           progressEntries: currentState is ProgressLoaded
               ? currentState.progressEntries
               : null,
-          errorType: ProgressErrorType.general,
         ),
       );
     }
@@ -195,11 +192,10 @@ class ProgressBloc extends Bloc<ProgressEvent, ProgressState> {
     } on Exception catch (e) {
       emit(
         ProgressError(
-          message: 'Failed to create or update today\'s entry: ${e.toString()}',
+          message: "Failed to create or update today's entry: ${e.toString()}",
           progressEntries: currentState is ProgressLoaded
               ? currentState.progressEntries
               : null,
-          errorType: ProgressErrorType.general,
         ),
       );
     }
@@ -260,7 +256,6 @@ class ProgressBloc extends Bloc<ProgressEvent, ProgressState> {
           progressEntries: currentState is ProgressLoaded
               ? currentState.progressEntries
               : null,
-          errorType: ProgressErrorType.general,
         ),
       );
     }
@@ -320,7 +315,6 @@ class ProgressBloc extends Bloc<ProgressEvent, ProgressState> {
           progressEntries: currentState is ProgressLoaded
               ? currentState.progressEntries
               : null,
-          errorType: ProgressErrorType.general,
         ),
       );
     }
@@ -387,7 +381,6 @@ class ProgressBloc extends Bloc<ProgressEvent, ProgressState> {
           progressEntries: currentState is ProgressLoaded
               ? currentState.progressEntries
               : null,
-          errorType: ProgressErrorType.general,
         ),
       );
     }
@@ -806,7 +799,6 @@ class ProgressBloc extends Bloc<ProgressEvent, ProgressState> {
       emit(
         ProgressError(
           message: 'Failed to refresh progress data: ${e.toString()}',
-          errorType: ProgressErrorType.general,
         ),
       );
     }

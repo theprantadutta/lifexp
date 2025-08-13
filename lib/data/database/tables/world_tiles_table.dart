@@ -57,7 +57,7 @@ class WorldTiles extends Table {
   List<String> get customConstraints => [
     'CHECK (length(name) >= 1 AND length(name) <= 100)',
     'CHECK (length(description) <= 500)',
-    'CHECK (tile_type IN ("grass", "forest", "mountain", "water", "desert", "city", "building", "special"))',
+    "CHECK (tile_type IN ('grass', 'forest', 'mountain', 'water', 'desert', 'city', 'building', 'special'))",
     'CHECK (unlock_requirement >= 0)',
     'CHECK (position_x >= 0 AND position_x <= 1000)',
     'CHECK (position_y >= 0 AND position_y <= 1000)',

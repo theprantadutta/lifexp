@@ -48,6 +48,20 @@ class IncreaseAttribute extends AvatarEvent {
   List<Object?> get props => [avatarId, attributeType, amount];
 }
 
+/// Event to change avatar customization
+class AvatarCustomizationChanged extends AvatarEvent {
+  const AvatarCustomizationChanged({
+    required this.category,
+    required this.optionId,
+  });
+
+  final String category;
+  final String optionId;
+
+  @override
+  List<Object?> get props => [category, optionId];
+}
+
 /// Event to update avatar appearance
 class UpdateAppearance extends AvatarEvent {
   const UpdateAppearance({required this.avatarId, required this.appearance});

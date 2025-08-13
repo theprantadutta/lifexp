@@ -332,9 +332,19 @@ class Task extends Equatable {
     switch (category) {
       case TaskCategory.health:
         return AttributeType.strength;
+      case TaskCategory.fitness:
+        return AttributeType.strength;
+      case TaskCategory.mindfulness:
+        return AttributeType.wisdom;
       case TaskCategory.finance:
         return AttributeType.wisdom;
       case TaskCategory.work:
+        return AttributeType.intelligence;
+      case TaskCategory.learning:
+        return AttributeType.intelligence;
+      case TaskCategory.social:
+        return AttributeType.wisdom;
+      case TaskCategory.creative:
         return AttributeType.intelligence;
       case TaskCategory.custom:
         // Default to intelligence for custom tasks
@@ -390,6 +400,9 @@ class Task extends Equatable {
     'updatedAt': updatedAt.toIso8601String(),
   };
 
+  /// Converts to Map (alias for toJson for repository compatibility)
+  Map<String, dynamic> toMap() => toJson();
+
   @override
   List<Object?> get props => [
     id,
@@ -418,7 +431,17 @@ class Task extends Equatable {
 enum TaskType { daily, weekly, longTerm }
 
 /// Enum for task categories
-enum TaskCategory { health, finance, work, custom }
+enum TaskCategory { 
+  health, 
+  finance, 
+  work, 
+  custom,
+  learning,
+  social,
+  creative,
+  fitness,
+  mindfulness,
+}
 
 /// Extension to get display names for task types
 extension TaskTypeExtension on TaskType {
@@ -440,10 +463,20 @@ extension TaskCategoryExtension on TaskCategory {
     switch (this) {
       case TaskCategory.health:
         return 'Health';
+      case TaskCategory.fitness:
+        return 'Fitness';
+      case TaskCategory.mindfulness:
+        return 'Mindfulness';
       case TaskCategory.finance:
         return 'Finance';
       case TaskCategory.work:
         return 'Work';
+      case TaskCategory.learning:
+        return 'Learning';
+      case TaskCategory.social:
+        return 'Social';
+      case TaskCategory.creative:
+        return 'Creative';
       case TaskCategory.custom:
         return 'Custom';
     }
@@ -453,10 +486,20 @@ extension TaskCategoryExtension on TaskCategory {
     switch (this) {
       case TaskCategory.health:
         return '💪';
+      case TaskCategory.fitness:
+        return '🏃';
+      case TaskCategory.mindfulness:
+        return '🧘';
       case TaskCategory.finance:
         return '💰';
       case TaskCategory.work:
         return '💼';
+      case TaskCategory.learning:
+        return '📚';
+      case TaskCategory.social:
+        return '👥';
+      case TaskCategory.creative:
+        return '🎨';
       case TaskCategory.custom:
         return '⭐';
     }

@@ -11,9 +11,9 @@ abstract class ThemeEvent extends Equatable {
 
 /// Event to change the current theme
 class ChangeThemeEvent extends ThemeEvent {
-  final LifeXPThemeType themeType;
 
   const ChangeThemeEvent(this.themeType);
+  final LifeXPThemeType themeType;
 
   @override
   List<Object?> get props => [themeType];
@@ -26,9 +26,9 @@ class ToggleDarkModeEvent extends ThemeEvent {
 
 /// Event to unlock a new theme
 class UnlockThemeEvent extends ThemeEvent {
-  final LifeXPThemeType themeType;
 
   const UnlockThemeEvent(this.themeType);
+  final LifeXPThemeType themeType;
 
   @override
   List<Object?> get props => [themeType];

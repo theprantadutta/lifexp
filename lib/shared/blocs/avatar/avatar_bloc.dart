@@ -50,7 +50,6 @@ class AvatarBloc extends Bloc<AvatarEvent, AvatarState> {
       emit(
         AvatarError(
           message: 'Failed to load avatar: ${e.toString()}',
-          errorType: AvatarErrorType.general,
         ),
       );
     }
@@ -81,7 +80,6 @@ class AvatarBloc extends Bloc<AvatarEvent, AvatarState> {
       emit(
         AvatarError(
           message: 'Failed to create avatar: ${e.toString()}',
-          errorType: AvatarErrorType.general,
         ),
       );
     }
@@ -113,7 +111,6 @@ class AvatarBloc extends Bloc<AvatarEvent, AvatarState> {
           AvatarError(
             message: 'Failed to gain XP',
             avatar: previousAvatar,
-            errorType: AvatarErrorType.general,
           ),
         );
         return;
@@ -153,7 +150,6 @@ class AvatarBloc extends Bloc<AvatarEvent, AvatarState> {
         AvatarError(
           message: 'Failed to gain XP: ${e.toString()}',
           avatar: previousAvatar,
-          errorType: AvatarErrorType.general,
         ),
       );
     }
@@ -188,7 +184,6 @@ class AvatarBloc extends Bloc<AvatarEvent, AvatarState> {
           AvatarError(
             message: 'Failed to increase attribute',
             avatar: previousAvatar,
-            errorType: AvatarErrorType.general,
           ),
         );
         return;
@@ -213,7 +208,6 @@ class AvatarBloc extends Bloc<AvatarEvent, AvatarState> {
         AvatarError(
           message: 'Failed to increase attribute: ${e.toString()}',
           avatar: previousAvatar,
-          errorType: AvatarErrorType.general,
         ),
       );
     }
@@ -247,7 +241,6 @@ class AvatarBloc extends Bloc<AvatarEvent, AvatarState> {
           AvatarError(
             message: 'Failed to update appearance',
             avatar: previousAvatar,
-            errorType: AvatarErrorType.general,
           ),
         );
         return;
@@ -259,7 +252,6 @@ class AvatarBloc extends Bloc<AvatarEvent, AvatarState> {
         AvatarError(
           message: 'Failed to update appearance: ${e.toString()}',
           avatar: previousAvatar,
-          errorType: AvatarErrorType.general,
         ),
       );
     }
@@ -293,7 +285,6 @@ class AvatarBloc extends Bloc<AvatarEvent, AvatarState> {
           AvatarError(
             message: 'Failed to unlock item',
             avatar: previousAvatar,
-            errorType: AvatarErrorType.general,
           ),
         );
         return;
@@ -309,7 +300,6 @@ class AvatarBloc extends Bloc<AvatarEvent, AvatarState> {
           AvatarError(
             message: 'Failed to refresh avatar after item unlock',
             avatar: previousAvatar,
-            errorType: AvatarErrorType.general,
           ),
         );
         return;
@@ -328,7 +318,6 @@ class AvatarBloc extends Bloc<AvatarEvent, AvatarState> {
         AvatarError(
           message: 'Failed to unlock item: ${e.toString()}',
           avatar: previousAvatar,
-          errorType: AvatarErrorType.general,
         ),
       );
     }
@@ -367,7 +356,6 @@ class AvatarBloc extends Bloc<AvatarEvent, AvatarState> {
         AvatarError(
           message: 'Failed to refresh avatar: ${e.toString()}',
           avatar: currentAvatar,
-          errorType: AvatarErrorType.general,
         ),
       );
     }
@@ -385,8 +373,6 @@ class AvatarBloc extends Bloc<AvatarEvent, AvatarState> {
       currentState.copyWith(
         isLevelingUp: false,
         showCelebration: false,
-        celebrationType: null,
-        levelUpData: null,
       ),
     );
   }
@@ -400,7 +386,7 @@ class AvatarBloc extends Bloc<AvatarEvent, AvatarState> {
     if (currentState is! AvatarLoaded) return;
 
     try {
-      Avatar updatedAvatar = currentState.avatar;
+      var updatedAvatar = currentState.avatar;
 
       // Apply each bonus
       for (final entry in event.bonuses.entries) {
@@ -427,7 +413,6 @@ class AvatarBloc extends Bloc<AvatarEvent, AvatarState> {
         AvatarError(
           message: 'Failed to apply attribute bonuses: ${e.toString()}',
           avatar: currentState.avatar,
-          errorType: AvatarErrorType.general,
         ),
       );
     }

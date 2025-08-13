@@ -6,6 +6,8 @@ import '../../../shared/widgets/attribute_bar.dart';
 import '../../../shared/widgets/navigation/custom_app_bar.dart';
 import '../../../shared/widgets/task_card.dart';
 import '../../../shared/widgets/xp_progress_bar.dart';
+import '../widgets/daily_streak_widget.dart';
+import '../widgets/motivational_message.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -24,30 +26,47 @@ class HomeScreen extends StatelessWidget {
           children: [
             // Avatar and Level Section
             _buildAvatarSection(context, colorScheme),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
+
+            // Motivational Message Section
+            const MotivationalMessage(
+              currentXP: 180,
+              dailyGoal: 250,
+              streakCount: 7,
+              completedTasksToday: 2,
+            ),
+            const SizedBox(height: 20),
 
             // Daily XP Goal Section
             _buildDailyGoalSection(context, colorScheme),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
+
+            // Daily Streak Section
+            const DailyStreakWidget(
+              currentStreak: 7,
+              longestStreak: 12,
+              completedToday: true,
+            ),
+            const SizedBox(height: 20),
 
             // Attributes Section
             _buildAttributesSection(context, colorScheme),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
 
             // Today's Tasks Section
             _buildTodaysTasksSection(context, colorScheme),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
 
             // Quick Actions Section
             _buildQuickActionsSection(context, colorScheme),
+            const SizedBox(height: 20), // Extra padding at bottom
           ],
         ),
       ),
     );
   }
 
-  Widget _buildAvatarSection(BuildContext context, ColorScheme colorScheme) {
-    return Container(
+  Widget _buildAvatarSection(BuildContext context, ColorScheme colorScheme) => Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -71,6 +90,13 @@ class HomeScreen extends StatelessWidget {
               color: colorScheme.primary.withValues(alpha: 0.2),
               shape: BoxShape.circle,
               border: Border.all(color: colorScheme.primary, width: 2),
+              boxShadow: [
+                BoxShadow(
+                  color: colorScheme.primary.withValues(alpha: 0.2),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: Icon(Icons.person, size: 40, color: colorScheme.primary),
           ),
@@ -78,19 +104,22 @@ class HomeScreen extends StatelessWidget {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  'Level 12 Adventurer',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.onSurface,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    'Level 12 Adventurer',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.onSurface,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 8),
                 const XPProgressBar(
                   currentXP: 2450,
                   maxXP: 3000,
-                  showText: true,
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -98,6 +127,8 @@ class HomeScreen extends StatelessWidget {
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -105,10 +136,8 @@ class HomeScreen extends StatelessWidget {
         ],
       ),
     );
-  }
 
-  Widget _buildDailyGoalSection(BuildContext context, ColorScheme colorScheme) {
-    return Container(
+  Widget _buildDailyGoalSection(BuildContext context, ColorScheme colorScheme) => Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: colorScheme.surface,
@@ -134,7 +163,6 @@ class HomeScreen extends StatelessWidget {
           const XPProgressBar(
             currentXP: 180,
             maxXP: 250,
-            showText: true,
             height: 8,
           ),
           const SizedBox(height: 8),
@@ -164,13 +192,11 @@ class HomeScreen extends StatelessWidget {
         ],
       ),
     );
-  }
 
   Widget _buildAttributesSection(
     BuildContext context,
     ColorScheme colorScheme,
-  ) {
-    return Column(
+  ) => Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
@@ -202,20 +228,18 @@ class HomeScreen extends StatelessWidget {
         ),
       ],
     );
-  }
 
   Widget _buildTodaysTasksSection(
     BuildContext context,
     ColorScheme colorScheme,
-  ) {
-    return Column(
+  ) => Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Today\'s Tasks',
+              "Today's Tasks",
               style: Theme.of(
                 context,
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
@@ -256,17 +280,14 @@ class HomeScreen extends StatelessWidget {
           category: 'Work',
           xpReward: 100,
           difficulty: 3,
-          streakCount: 0,
         ),
       ],
     );
-  }
 
   Widget _buildQuickActionsSection(
     BuildContext context,
     ColorScheme colorScheme,
-  ) {
-    return Column(
+  ) => Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
@@ -341,7 +362,6 @@ class HomeScreen extends StatelessWidget {
         ),
       ],
     );
-  }
 
   Widget _buildQuickActionCard(
     BuildContext context,
@@ -350,46 +370,51 @@ class HomeScreen extends StatelessWidget {
     required String title,
     required String subtitle,
     required VoidCallback onTap,
-  }) {
-    return InkWell(
+  }) => InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: colorScheme.primary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: colorScheme.primary, size: 24),
+              child: Icon(icon, color: colorScheme.primary, size: 20),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
             Text(
               title,
-              style: Theme.of(
-                context,
-              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                fontSize: 12,
+              ),
               textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 2),
             Text(
               subtitle,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurface.withValues(alpha: 0.7),
+                fontSize: 10,
               ),
               textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
       ),
     );
-  }
 }

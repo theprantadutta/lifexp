@@ -72,7 +72,7 @@ class TaskLoaded extends TaskState {
 
   /// Gets tasks by category
   Map<TaskCategory, List<Task>> get tasksByCategory {
-    final Map<TaskCategory, List<Task>> categorizedTasks = {};
+    final categorizedTasks = <TaskCategory, List<Task>>{};
     for (final category in TaskCategory.values) {
       categorizedTasks[category] = displayTasks
           .where((task) => task.category == category)
@@ -83,7 +83,7 @@ class TaskLoaded extends TaskState {
 
   /// Gets tasks by type
   Map<TaskType, List<Task>> get tasksByType {
-    final Map<TaskType, List<Task>> typedTasks = {};
+    final typedTasks = <TaskType, List<Task>>{};
     for (final type in TaskType.values) {
       typedTasks[type] = displayTasks
           .where((task) => task.type == type)
@@ -153,7 +153,6 @@ class TaskLoaded extends TaskState {
   /// Clears completion animation state
   TaskLoaded clearCompletionAnimation() => copyWith(
     showCompletionAnimation: false,
-    completedTaskId: null,
     completingTasks: const [],
     streakBonuses: const {},
     xpRewards: const {},
@@ -161,7 +160,7 @@ class TaskLoaded extends TaskState {
 
   /// Clears filters
   TaskLoaded clearFilters() =>
-      copyWith(filteredTasks: null, activeFilter: null, searchQuery: '');
+      copyWith(searchQuery: '');
 }
 
 /// State when task operation fails

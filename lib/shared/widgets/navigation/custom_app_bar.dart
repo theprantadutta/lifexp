@@ -3,6 +3,18 @@ import '../../themes/theme_extensions.dart';
 
 /// Custom app bar with gamification styling
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+
+  const CustomAppBar({
+    required this.title, super.key,
+    this.actions,
+    this.leading,
+    this.showBackButton = true,
+    this.showMenuButton = false,
+    this.onMenuPressed,
+    this.backgroundColor,
+    this.showGradient = false,
+    this.elevation = 0,
+  });
   final String title;
   final List<Widget>? actions;
   final Widget? leading;
@@ -13,25 +25,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool showGradient;
   final double elevation;
 
-  const CustomAppBar({
-    super.key,
-    required this.title,
-    this.actions,
-    this.leading,
-    this.showBackButton = true,
-    this.showMenuButton = false,
-    this.onMenuPressed,
-    this.backgroundColor,
-    this.showGradient = false,
-    this.elevation = 0,
-  });
-
   @override
   Widget build(BuildContext context) {
     final appBarColor =
         backgroundColor ?? Theme.of(context).colorScheme.surface;
 
-    return Container(
+    return DecoratedBox(
       decoration: showGradient
           ? BoxDecoration(gradient: context.xpGradient)
           : BoxDecoration(
@@ -98,6 +97,13 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
 /// App bar with XP progress indicator
 class XPAppBar extends StatelessWidget implements PreferredSizeWidget {
+
+  const XPAppBar({
+    required this.title, required this.currentXP, required this.maxXP, required this.level, super.key,
+    this.actions,
+    this.showMenuButton = false,
+    this.onMenuPressed,
+  });
   final String title;
   final int currentXP;
   final int maxXP;
@@ -106,20 +112,8 @@ class XPAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool showMenuButton;
   final VoidCallback? onMenuPressed;
 
-  const XPAppBar({
-    super.key,
-    required this.title,
-    required this.currentXP,
-    required this.maxXP,
-    required this.level,
-    this.actions,
-    this.showMenuButton = false,
-    this.onMenuPressed,
-  });
-
   @override
-  Widget build(BuildContext context) {
-    return Container(
+  Widget build(BuildContext context) => DecoratedBox(
       decoration: BoxDecoration(gradient: context.xpGradient),
       child: SafeArea(
         child: Column(
@@ -239,7 +233,6 @@ class XPAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
     );
-  }
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight + 60);
@@ -247,22 +240,20 @@ class XPAppBar extends StatelessWidget implements PreferredSizeWidget {
 
 /// Compact app bar for secondary screens
 class CompactAppBar extends StatelessWidget implements PreferredSizeWidget {
+
+  const CompactAppBar({
+    required this.title, super.key,
+    this.actions,
+    this.leading,
+    this.centerTitle = true,
+  });
   final String title;
   final List<Widget>? actions;
   final Widget? leading;
   final bool centerTitle;
 
-  const CompactAppBar({
-    super.key,
-    required this.title,
-    this.actions,
-    this.leading,
-    this.centerTitle = true,
-  });
-
   @override
-  Widget build(BuildContext context) {
-    return AppBar(
+  Widget build(BuildContext context) => AppBar(
       title: Text(
         title,
         style: Theme.of(
@@ -282,7 +273,6 @@ class CompactAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
     );
-  }
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight + 1);

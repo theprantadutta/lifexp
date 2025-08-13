@@ -16,7 +16,8 @@ class ProgressRepository {
   final Map<String, List<ProgressEntry>> _progressCache = {};
   final Map<String, DateTime> _cacheTimestamps = {};
 
-  // Cache expiration time (5 minutes for progress data as it updates frequently)
+  // Cache expiration time (5 minutes for progress data as it updates
+  // frequently)
   static const Duration _cacheExpiration = Duration(minutes: 5);
 
   // Stream controllers for real-time updates
@@ -192,84 +193,65 @@ class ProgressRepository {
     Map<String, int>? categoryBreakdown,
     Map<String, int>? taskTypeBreakdown,
     Map<String, dynamic>? additionalMetrics,
-  }) async {
-    return createOrUpdateTodayEntry(
-      userId,
-      xpGain,
-      tasksCompleted,
-      category: category,
-      categoryBreakdown: categoryBreakdown,
-      taskTypeBreakdown: taskTypeBreakdown,
-      streakCount: streakCount,
-      levelAtTime: currentLevel,
-    );
-  }
+  }) async => createOrUpdateTodayEntry(
+    userId,
+    xpGain,
+    tasksCompleted,
+    category: category,
+    categoryBreakdown: categoryBreakdown,
+    taskTypeBreakdown: taskTypeBreakdown,
+    streakCount: streakCount,
+    levelAtTime: currentLevel,
+  );
 
   /// Gets daily XP trend data for charts
   Future<List<Map<String, dynamic>>> getDailyXPTrend(
     String userId, {
     int days = 30,
-  }) async {
-    return _database.progressDao.getDailyXPTrend(userId, days: days);
-  }
+  }) async => _database.progressDao.getDailyXPTrend(userId, days: days);
 
   /// Gets weekly progress summary
   Future<List<Map<String, dynamic>>> getWeeklyProgressSummary(
     String userId, {
     int weeks = 12,
-  }) async {
-    return _database.progressDao.getWeeklyProgressSummary(userId, weeks: weeks);
-  }
+  }) async =>
+      _database.progressDao.getWeeklyProgressSummary(userId, weeks: weeks);
 
   /// Gets monthly progress summary
   Future<List<Map<String, dynamic>>> getMonthlyProgressSummary(
     String userId, {
     int months = 12,
-  }) async {
-    return _database.progressDao.getMonthlyProgressSummary(
-      userId,
-      months: months,
-    );
-  }
+  }) async =>
+      _database.progressDao.getMonthlyProgressSummary(userId, months: months);
 
   /// Gets category breakdown for a time period
   Future<List<Map<String, dynamic>>> getCategoryBreakdown(
     String userId,
     DateTime startDate,
     DateTime endDate,
-  ) async {
-    return _database.progressDao.getCategoryBreakdown(
-      userId,
-      startDate,
-      endDate,
-    );
-  }
+  ) async =>
+      _database.progressDao.getCategoryBreakdown(userId, startDate, endDate);
 
   /// Gets overall progress statistics
-  Future<Map<String, dynamic>> getProgressStats(String userId) async {
-    return _database.progressDao.getProgressStats(userId);
-  }
+  Future<Map<String, dynamic>> getProgressStats(String userId) async =>
+      _database.progressDao.getProgressStats(userId);
 
   /// Gets productivity streaks
   Future<List<Map<String, dynamic>>> getProductivityStreaks(
     String userId, {
     int minXP = 50,
     int minTasks = 3,
-  }) async {
-    return _database.progressDao.getProductivityStreaks(
-      userId,
-      minXP: minXP,
-      minTasks: minTasks,
-    );
-  }
+  }) async => _database.progressDao.getProductivityStreaks(
+    userId,
+    minXP: minXP,
+    minTasks: minTasks,
+  );
 
   /// Gets batch analytics for performance optimization
   Future<Map<String, dynamic>> getBatchAnalytics(
     String userId, {
     int days = 30,
-  }) async {
-    return _database.progressDao.getBatchAnalytics(userId, days: days);
-  }
+  }) async => _database.progressDao.getBatchAnalytics(userId, days: days);
 
   /// Aggregates progress entries by date
   Future<Map<String, ProgressSummary>> aggregateProgressByDate(
@@ -321,7 +303,7 @@ class ProgressRepository {
   /// Analyzes progress patterns and provides insights
   Future<Map<String, dynamic>> analyzeProgressPatterns(String userId) async {
     final stats = await getProgressStats(userId);
-    final recentEntries = await getRecentProgressEntries(userId, days: 30);
+    final recentEntries = await getRecentProgressEntries(userId);
     final streaks = await getProductivityStreaks(userId);
 
     // Calculate patterns
@@ -352,7 +334,7 @@ class ProgressRepository {
     String userId, {
     int daysAhead = 30,
   }) async {
-    final recentEntries = await getRecentProgressEntries(userId, days: 30);
+    final recentEntries = await getRecentProgressEntries(userId);
 
     if (recentEntries.isEmpty) {
       return {
@@ -468,9 +450,7 @@ class ProgressRepository {
     List<ProgressEntry> entries,
     String userId,
   ) async {
-    final companions = entries
-        .map((entry) => _convertToCompanion(entry))
-        .toList();
+    final companions = entries.map(_convertToCompanion).toList();
     await _database.progressDao.batchUpdateProgressEntries(companions);
 
     // Clear cache and notify
@@ -532,7 +512,9 @@ class ProgressRepository {
   ProgressEntry? _getCachedEntryById(String entryId) {
     for (final entries in _progressCache.values) {
       final entry = entries.where((e) => e.id == entryId).firstOrNull;
-      if (entry != null) return entry;
+      if (entry != null) {
+        return entry;
+      }
     }
     return null;
   }
@@ -546,7 +528,9 @@ class ProgressRepository {
   /// Checks if cache is valid
   bool _isCacheValid(String userId) {
     final timestamp = _cacheTimestamps[userId];
-    if (timestamp == null) return false;
+    if (timestamp == null) {
+      return false;
+    }
     return DateTime.now().difference(timestamp) < _cacheExpiration;
   }
 
@@ -634,7 +618,7 @@ class ProgressRepository {
 
   /// Calculates consistency score (0-100)
   double _calculateConsistencyScore(List<ProgressEntry> entries) {
-    if (entries.length < 7) return 0.0;
+    if (entries.length < 7) return 0;
 
     final sortedEntries = List<ProgressEntry>.from(entries)
       ..sort((a, b) => a.date.compareTo(b.date));
@@ -655,7 +639,7 @@ class ProgressRepository {
 
   /// Calculates improvement trend
   double _calculateImprovementTrend(List<ProgressEntry> entries) {
-    if (entries.length < 2) return 0.0;
+    if (entries.length < 2) return 0;
 
     final sortedEntries = List<ProgressEntry>.from(entries)
       ..sort((a, b) => a.date.compareTo(b.date));
@@ -687,7 +671,7 @@ class ProgressRepository {
     final consistencyScore = _calculateConsistencyScore(entries);
     if (consistencyScore >= 80) {
       insights.add(
-        '🔥 Excellent consistency! You\'re maintaining great daily habits.',
+        "🔥 Excellent consistency! You're maintaining great daily habits.",
       );
     } else if (consistencyScore >= 60) {
       insights.add('👍 Good consistency! Try to maintain your daily routine.');
@@ -713,7 +697,7 @@ class ProgressRepository {
     final improvementTrend = _calculateImprovementTrend(entries);
     if (improvementTrend > 10) {
       insights.add(
-        '📈 You\'re improving! Your recent performance is trending upward.',
+        "📈 You're improving! Your recent performance is trending upward.",
       );
     } else if (improvementTrend < -10) {
       insights.add(
@@ -733,14 +717,14 @@ class ProgressRepository {
 
   /// Calculates linear trend
   double _calculateLinearTrend(List<double> values) {
-    if (values.length < 2) return 0.0;
+    if (values.length < 2) return 0;
 
     final n = values.length;
     final sumX = (n * (n - 1)) / 2; // Sum of indices
-    final sumY = values.fold(0.0, (sum, value) => sum + value);
+    final sumY = values.reduce((sum, value) => sum + value);
     final sumXY = values.asMap().entries.fold(
       0.0,
-      (sum, entry) => sum + (entry.key * entry.value),
+      (sum, entry) => sum + (entry.key.toDouble() * entry.value),
     );
     final sumX2 = (n * (n - 1) * (2 * n - 1)) / 6; // Sum of squared indices
 
@@ -750,9 +734,15 @@ class ProgressRepository {
 
   /// Calculates prediction confidence
   double _calculatePredictionConfidence(List<ProgressEntry> entries) {
-    if (entries.length < 7) return 0.2;
-    if (entries.length < 14) return 0.5;
-    if (entries.length < 30) return 0.7;
+    if (entries.length < 7) {
+      return 0.2;
+    }
+    if (entries.length < 14) {
+      return 0.5;
+    }
+    if (entries.length < 30) {
+      return 0.7;
+    }
     return 0.9;
   }
 
@@ -818,23 +808,22 @@ class ProgressRepository {
   }
 
   /// Converts ProgressEntry model to database companion
-  ProgressEntriesCompanion _convertToCompanion(ProgressEntry entry) {
-    return ProgressEntriesCompanion.insert(
-      id: entry.id,
-      userId: entry.userId,
-      date: entry.date,
-      xpGained: Value(entry.xpGained),
-      tasksCompleted: Value(entry.tasksCompleted),
-      category: Value(entry.category),
-      categoryBreakdown: Value(json.encode(entry.categoryBreakdown)),
-      taskTypeBreakdown: Value(json.encode(entry.taskTypeBreakdown)),
-      streakCount: Value(entry.streakCount),
-      levelAtTime: Value(entry.levelAtTime),
-      additionalMetrics: Value(json.encode(entry.additionalMetrics)),
-      createdAt: entry.createdAt,
-      updatedAt: entry.updatedAt,
-    );
-  }
+  ProgressEntriesCompanion _convertToCompanion(ProgressEntry entry) =>
+      ProgressEntriesCompanion.insert(
+        id: entry.id,
+        userId: entry.userId,
+        date: entry.date,
+        xpGained: Value(entry.xpGained),
+        tasksCompleted: Value(entry.tasksCompleted),
+        category: Value(entry.category),
+        categoryBreakdown: Value(json.encode(entry.categoryBreakdown)),
+        taskTypeBreakdown: Value(json.encode(entry.taskTypeBreakdown)),
+        streakCount: Value(entry.streakCount),
+        levelAtTime: Value(entry.levelAtTime),
+        additionalMetrics: Value(json.encode(entry.additionalMetrics)),
+        createdAt: entry.createdAt,
+        updatedAt: entry.updatedAt,
+      );
 }
 
 /// Extension to add firstOrNull method

@@ -254,6 +254,9 @@ class Avatar extends Equatable {
     'updatedAt': updatedAt.toIso8601String(),
   };
 
+  /// Converts to Map (alias for toJson for repository compatibility)
+  Map<String, dynamic> toMap() => toJson();
+
   @override
   List<Object?> get props => [
     id,

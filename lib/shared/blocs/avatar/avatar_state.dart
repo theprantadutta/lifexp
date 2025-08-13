@@ -73,8 +73,6 @@ class AvatarLoaded extends AvatarState {
   /// Clears celebration state
   AvatarLoaded clearCelebration() => copyWith(
     showCelebration: false,
-    celebrationType: null,
-    levelUpData: null,
     unlockedItems: const [],
     attributeBonuses: const {},
   );

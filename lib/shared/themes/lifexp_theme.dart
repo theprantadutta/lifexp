@@ -67,7 +67,6 @@ class LifeXPTheme {
   static ThemeData get lightTheme => _buildTheme(
     colorScheme: ColorScheme.fromSeed(
       seedColor: _primarySeedLight,
-      brightness: Brightness.light,
       secondary: _secondarySeedLight,
       tertiary: _tertiarySeedLight,
     ),
@@ -90,7 +89,6 @@ class LifeXPTheme {
   static ThemeData get oceanTheme => _buildTheme(
     colorScheme: ColorScheme.fromSeed(
       seedColor: const Color(0xFF0EA5E9), // Sky blue
-      brightness: Brightness.light,
       secondary: const Color(0xFF06B6D4), // Cyan
       tertiary: const Color(0xFF8B5CF6), // Purple
     ),
@@ -107,7 +105,6 @@ class LifeXPTheme {
   static ThemeData get forestTheme => _buildTheme(
     colorScheme: ColorScheme.fromSeed(
       seedColor: const Color(0xFF059669), // Emerald
-      brightness: Brightness.light,
       secondary: const Color(0xFF10B981), // Green
       tertiary: const Color(0xFF84CC16), // Lime
     ),
@@ -124,7 +121,6 @@ class LifeXPTheme {
   static ThemeData get sunsetTheme => _buildTheme(
     colorScheme: ColorScheme.fromSeed(
       seedColor: const Color(0xFFEF4444), // Red
-      brightness: Brightness.light,
       secondary: const Color(0xFFF97316), // Orange
       tertiary: const Color(0xFFF59E0B), // Amber
     ),
@@ -143,8 +139,7 @@ class LifeXPTheme {
     required ColorScheme colorScheme,
     required Map<String, Color> customColors,
     required Brightness brightness,
-  }) {
-    return ThemeData(
+  }) => ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
       brightness: brightness,
@@ -299,7 +294,6 @@ class LifeXPTheme {
       // Extensions for custom colors
       extensions: [LifeXPColors(customColors)],
     );
-  }
 
   // Available theme types
   static const List<LifeXPThemeType> availableThemes = [
@@ -329,9 +323,9 @@ class LifeXPTheme {
 
 /// Theme extension for custom colors
 class LifeXPColors extends ThemeExtension<LifeXPColors> {
-  final Map<String, Color> colors;
 
   const LifeXPColors(this.colors);
+  final Map<String, Color> colors;
 
   Color get xpPrimary => colors['xpPrimary']!;
   Color get xpSecondary => colors['xpSecondary']!;
@@ -351,9 +345,7 @@ class LifeXPColors extends ThemeExtension<LifeXPColors> {
   Color get worldDesert => colors['worldDesert']!;
 
   @override
-  LifeXPColors copyWith({Map<String, Color>? colors}) {
-    return LifeXPColors(colors ?? this.colors);
-  }
+  LifeXPColors copyWith({Map<String, Color>? colors}) => LifeXPColors(colors ?? this.colors);
 
   @override
   LifeXPColors lerp(ThemeExtension<LifeXPColors>? other, double t) {

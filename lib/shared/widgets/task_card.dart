@@ -3,6 +3,19 @@ import '../themes/theme_extensions.dart';
 
 /// A card widget for displaying tasks with completion animations
 class TaskCard extends StatefulWidget {
+
+  const TaskCard({
+    required this.title, required this.category, required this.xpReward, required this.difficulty, super.key,
+    this.description,
+    this.streakCount = 0,
+    this.isCompleted = false,
+    this.dueDate,
+    this.onTap,
+    this.onComplete,
+    this.onEdit,
+    this.onDelete,
+    this.showActions = true,
+  });
   final String title;
   final String? description;
   final String category;
@@ -16,23 +29,6 @@ class TaskCard extends StatefulWidget {
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
   final bool showActions;
-
-  const TaskCard({
-    super.key,
-    required this.title,
-    this.description,
-    required this.category,
-    required this.xpReward,
-    required this.difficulty,
-    this.streakCount = 0,
-    this.isCompleted = false,
-    this.dueDate,
-    this.onTap,
-    this.onComplete,
-    this.onEdit,
-    this.onDelete,
-    this.showActions = true,
-  });
 
   @override
   State<TaskCard> createState() => _TaskCardState();
@@ -53,11 +49,11 @@ class _TaskCardState extends State<TaskCard>
       vsync: this,
     );
 
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+    _scaleAnimation = Tween<double>(begin: 1, end: 0.95).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
 
-    _fadeAnimation = Tween<double>(begin: 1.0, end: 0.7).animate(
+    _fadeAnimation = Tween<double>(begin: 1, end: 0.7).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
   }
@@ -68,7 +64,7 @@ class _TaskCardState extends State<TaskCard>
     super.dispose();
   }
 
-  void _handleComplete() async {
+  Future<void> _handleComplete() async {
     if (_isAnimating || widget.isCompleted) return;
 
     setState(() {
@@ -99,8 +95,7 @@ class _TaskCardState extends State<TaskCard>
 
     return AnimatedBuilder(
       animation: _animationController,
-      builder: (context, child) {
-        return Transform.scale(
+      builder: (context, child) => Transform.scale(
           scale: _scaleAnimation.value,
           child: Opacity(
             opacity: _fadeAnimation.value,
@@ -110,7 +105,7 @@ class _TaskCardState extends State<TaskCard>
               child: InkWell(
                 onTap: widget.onTap,
                 borderRadius: BorderRadius.circular(12),
-                child: Container(
+                child: DecoratedBox(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
@@ -119,7 +114,6 @@ class _TaskCardState extends State<TaskCard>
                               context,
                             ).colorScheme.outline.withValues(alpha: 0.3)
                           : categoryColor.withValues(alpha: 0.3),
-                      width: 1,
                     ),
                   ),
                   child: Column(
@@ -430,8 +424,7 @@ class _TaskCardState extends State<TaskCard>
               ),
             ),
           ),
-        );
-      },
+        ),
     );
   }
 

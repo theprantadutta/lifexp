@@ -78,12 +78,10 @@ class ProgressLoaded extends ProgressState {
     final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
     final endOfWeek = startOfWeek.add(const Duration(days: 6));
 
-    return displayEntries.where((entry) {
-      return entry.date.isAfter(
+    return displayEntries.where((entry) => entry.date.isAfter(
             startOfWeek.subtract(const Duration(days: 1)),
           ) &&
-          entry.date.isBefore(endOfWeek.add(const Duration(days: 1)));
-    }).toList();
+          entry.date.isBefore(endOfWeek.add(const Duration(days: 1)))).toList();
   }
 
   /// Gets this month's progress entries
@@ -92,12 +90,10 @@ class ProgressLoaded extends ProgressState {
     final startOfMonth = DateTime(now.year, now.month);
     final endOfMonth = DateTime(now.year, now.month + 1, 0);
 
-    return displayEntries.where((entry) {
-      return entry.date.isAfter(
+    return displayEntries.where((entry) => entry.date.isAfter(
             startOfMonth.subtract(const Duration(days: 1)),
           ) &&
-          entry.date.isBefore(endOfMonth.add(const Duration(days: 1)));
-    }).toList();
+          entry.date.isBefore(endOfMonth.add(const Duration(days: 1)))).toList();
   }
 
   /// Gets progress statistics summary
@@ -106,8 +102,8 @@ class ProgressLoaded extends ProgressState {
       return const ProgressStatsSummary(
         totalXP: 0,
         totalTasks: 0,
-        averageXP: 0.0,
-        averageTasks: 0.0,
+        averageXP: 0,
+        averageTasks: 0,
         maxStreak: 0,
         currentStreak: 0,
         productiveDays: 0,
@@ -238,7 +234,7 @@ class ProgressLoaded extends ProgressState {
 
   /// Clears filters
   ProgressLoaded clearFilters() =>
-      copyWith(filteredEntries: null, activeFilter: null);
+      copyWith();
 }
 
 /// State when progress operation fails

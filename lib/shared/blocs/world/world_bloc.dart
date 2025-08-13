@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../data/models/world.dart';
+import '../../../data/models/world_tile.dart';
 import '../../../data/repositories/world_repository.dart';
 import 'world_event.dart';
 import 'world_state.dart';
@@ -66,7 +66,6 @@ class WorldBloc extends Bloc<WorldEvent, WorldState> {
       emit(
         WorldError(
           message: 'Failed to load world tiles: ${e.toString()}',
-          errorType: WorldErrorType.general,
         ),
       );
     }
@@ -85,7 +84,7 @@ class WorldBloc extends Bloc<WorldEvent, WorldState> {
         event.userId,
       );
 
-      final filter = const WorldFilter(isUnlocked: true);
+      const filter = WorldFilter(isUnlocked: true);
 
       emit(
         currentState.copyWith(
@@ -98,7 +97,6 @@ class WorldBloc extends Bloc<WorldEvent, WorldState> {
         WorldError(
           message: 'Failed to load unlocked tiles: ${e.toString()}',
           worldTiles: currentState.worldTiles,
-          errorType: WorldErrorType.general,
         ),
       );
     }
@@ -115,7 +113,7 @@ class WorldBloc extends Bloc<WorldEvent, WorldState> {
     try {
       final lockedTiles = await _worldRepository.getLockedTiles(event.userId);
 
-      final filter = const WorldFilter(isUnlocked: false);
+      const filter = WorldFilter(isUnlocked: false);
 
       emit(
         currentState.copyWith(filteredTiles: lockedTiles, activeFilter: filter),
@@ -125,7 +123,6 @@ class WorldBloc extends Bloc<WorldEvent, WorldState> {
         WorldError(
           message: 'Failed to load locked tiles: ${e.toString()}',
           worldTiles: currentState.worldTiles,
-          errorType: WorldErrorType.general,
         ),
       );
     }
@@ -155,7 +152,6 @@ class WorldBloc extends Bloc<WorldEvent, WorldState> {
         WorldError(
           message: 'Failed to load tiles by type: ${e.toString()}',
           worldTiles: currentState.worldTiles,
-          errorType: WorldErrorType.general,
         ),
       );
     }
@@ -195,7 +191,6 @@ class WorldBloc extends Bloc<WorldEvent, WorldState> {
         WorldError(
           message: 'Failed to load tiles in area: ${e.toString()}',
           worldTiles: currentState.worldTiles,
-          errorType: WorldErrorType.general,
         ),
       );
     }
@@ -222,7 +217,6 @@ class WorldBloc extends Bloc<WorldEvent, WorldState> {
         WorldError(
           message: 'Failed to load unlockable tiles: ${e.toString()}',
           worldTiles: currentState.worldTiles,
-          errorType: WorldErrorType.general,
         ),
       );
     }
@@ -234,7 +228,7 @@ class WorldBloc extends Bloc<WorldEvent, WorldState> {
     Emitter<WorldState> emit,
   ) async {
     final currentState = state;
-    List<WorldTile> currentTiles = [];
+    var currentTiles = <WorldTile>[];
 
     if (currentState is WorldLoaded) {
       currentTiles = currentState.worldTiles;
@@ -264,7 +258,6 @@ class WorldBloc extends Bloc<WorldEvent, WorldState> {
         WorldError(
           message: 'Failed to create world tile: ${e.toString()}',
           worldTiles: currentTiles,
-          errorType: WorldErrorType.general,
         ),
       );
     }
@@ -329,7 +322,6 @@ class WorldBloc extends Bloc<WorldEvent, WorldState> {
         WorldError(
           message: 'Failed to unlock tile: ${e.toString()}',
           worldTiles: currentState.worldTiles,
-          errorType: WorldErrorType.general,
         ),
       );
     }
@@ -395,7 +387,6 @@ class WorldBloc extends Bloc<WorldEvent, WorldState> {
         WorldError(
           message: 'Failed to batch unlock tiles: ${e.toString()}',
           worldTiles: currentState.worldTiles,
-          errorType: WorldErrorType.general,
         ),
       );
     }
@@ -455,7 +446,6 @@ class WorldBloc extends Bloc<WorldEvent, WorldState> {
         WorldError(
           message: 'Failed to check and unlock tiles: ${e.toString()}',
           worldTiles: currentState.worldTiles,
-          errorType: WorldErrorType.general,
         ),
       );
     }
@@ -502,7 +492,6 @@ class WorldBloc extends Bloc<WorldEvent, WorldState> {
           WorldError(
             message: 'Failed to refresh tile after position update',
             worldTiles: currentState.worldTiles,
-            errorType: WorldErrorType.general,
           ),
         );
         return;
@@ -518,7 +507,6 @@ class WorldBloc extends Bloc<WorldEvent, WorldState> {
         WorldError(
           message: 'Failed to update tile position: ${e.toString()}',
           worldTiles: currentState.worldTiles,
-          errorType: WorldErrorType.general,
         ),
       );
     }
@@ -551,7 +539,6 @@ class WorldBloc extends Bloc<WorldEvent, WorldState> {
           WorldError(
             message: 'Failed to update tile properties',
             worldTiles: currentState.worldTiles,
-            errorType: WorldErrorType.general,
           ),
         );
         return;
@@ -564,7 +551,6 @@ class WorldBloc extends Bloc<WorldEvent, WorldState> {
           WorldError(
             message: 'Failed to refresh tile after property update',
             worldTiles: currentState.worldTiles,
-            errorType: WorldErrorType.general,
           ),
         );
         return;
@@ -580,7 +566,6 @@ class WorldBloc extends Bloc<WorldEvent, WorldState> {
         WorldError(
           message: 'Failed to update tile properties: ${e.toString()}',
           worldTiles: currentState.worldTiles,
-          errorType: WorldErrorType.general,
         ),
       );
     }
@@ -607,7 +592,6 @@ class WorldBloc extends Bloc<WorldEvent, WorldState> {
         WorldError(
           message: 'Failed to load adjacent tiles: ${e.toString()}',
           worldTiles: currentState.worldTiles,
-          errorType: WorldErrorType.general,
         ),
       );
     }
@@ -630,7 +614,6 @@ class WorldBloc extends Bloc<WorldEvent, WorldState> {
         WorldError(
           message: 'Failed to load world stats: ${e.toString()}',
           worldTiles: currentState.worldTiles,
-          errorType: WorldErrorType.general,
         ),
       );
     }
@@ -655,7 +638,6 @@ class WorldBloc extends Bloc<WorldEvent, WorldState> {
         WorldError(
           message: 'Failed to load world progression: ${e.toString()}',
           worldTiles: currentState.worldTiles,
-          errorType: WorldErrorType.general,
         ),
       );
     }
@@ -678,7 +660,6 @@ class WorldBloc extends Bloc<WorldEvent, WorldState> {
         WorldError(
           message: 'Failed to load world map data: ${e.toString()}',
           worldTiles: currentState.worldTiles,
-          errorType: WorldErrorType.general,
         ),
       );
     }
@@ -702,7 +683,6 @@ class WorldBloc extends Bloc<WorldEvent, WorldState> {
         WorldError(
           message: 'Failed to get world completion percentage: ${e.toString()}',
           worldTiles: currentState.worldTiles,
-          errorType: WorldErrorType.general,
         ),
       );
     }
@@ -727,7 +707,6 @@ class WorldBloc extends Bloc<WorldEvent, WorldState> {
         WorldError(
           message: 'Failed to load world analytics: ${e.toString()}',
           worldTiles: currentState.worldTiles,
-          errorType: WorldErrorType.general,
         ),
       );
     }
@@ -757,7 +736,6 @@ class WorldBloc extends Bloc<WorldEvent, WorldState> {
         WorldError(
           message: 'Failed to get unlock eligibility report: ${e.toString()}',
           worldTiles: currentState.worldTiles,
-          errorType: WorldErrorType.general,
         ),
       );
     }
@@ -783,7 +761,6 @@ class WorldBloc extends Bloc<WorldEvent, WorldState> {
       emit(
         WorldError(
           message: 'Failed to create default world: ${e.toString()}',
-          errorType: WorldErrorType.general,
         ),
       );
     }
@@ -809,7 +786,6 @@ class WorldBloc extends Bloc<WorldEvent, WorldState> {
         WorldError(
           message: 'Failed to calculate optimal placements: ${e.toString()}',
           worldTiles: currentState.worldTiles,
-          errorType: WorldErrorType.general,
         ),
       );
     }
@@ -835,7 +811,6 @@ class WorldBloc extends Bloc<WorldEvent, WorldState> {
       emit(
         WorldError(
           message: 'Failed to refresh world data: ${e.toString()}',
-          errorType: WorldErrorType.general,
         ),
       );
     }

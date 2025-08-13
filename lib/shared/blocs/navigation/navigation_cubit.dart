@@ -1,22 +1,20 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// Navigation state
 class NavigationState extends Equatable {
-  final int currentIndex;
-  final String currentRoute;
 
   const NavigationState({
     required this.currentIndex,
     required this.currentRoute,
   });
+  final int currentIndex;
+  final String currentRoute;
 
-  NavigationState copyWith({int? currentIndex, String? currentRoute}) {
-    return NavigationState(
+  NavigationState copyWith({int? currentIndex, String? currentRoute}) => NavigationState(
       currentIndex: currentIndex ?? this.currentIndex,
       currentRoute: currentRoute ?? this.currentRoute,
     );
-  }
 
   @override
   List<Object> get props => [currentIndex, currentRoute];

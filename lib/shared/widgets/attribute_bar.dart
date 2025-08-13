@@ -3,6 +3,15 @@ import '../themes/theme_extensions.dart';
 
 /// A widget for displaying character attributes with gradient fills
 class AttributeBar extends StatefulWidget {
+
+  const AttributeBar({
+    required this.attributeName, required this.currentValue, required this.maxValue, required this.icon, super.key,
+    this.color,
+    this.height = 32,
+    this.showText = true,
+    this.showIcon = true,
+    this.animationDuration = const Duration(milliseconds: 1000),
+  });
   final String attributeName;
   final int currentValue;
   final int maxValue;
@@ -12,19 +21,6 @@ class AttributeBar extends StatefulWidget {
   final bool showText;
   final bool showIcon;
   final Duration animationDuration;
-
-  const AttributeBar({
-    super.key,
-    required this.attributeName,
-    required this.currentValue,
-    required this.maxValue,
-    required this.icon,
-    this.color,
-    this.height = 32,
-    this.showText = true,
-    this.showIcon = true,
-    this.animationDuration = const Duration(milliseconds: 1000),
-  });
 
   @override
   State<AttributeBar> createState() => _AttributeBarState();
@@ -46,7 +42,7 @@ class _AttributeBarState extends State<AttributeBar>
 
     _progressAnimation =
         Tween<double>(
-          begin: 0.0,
+          begin: 0,
           end: widget.currentValue / widget.maxValue,
         ).animate(
           CurvedAnimation(
@@ -55,7 +51,7 @@ class _AttributeBarState extends State<AttributeBar>
           ),
         );
 
-    _glowAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+    _glowAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
 
@@ -149,8 +145,7 @@ class _AttributeBarState extends State<AttributeBar>
         // Progress bar
         AnimatedBuilder(
           animation: _animationController,
-          builder: (context, child) {
-            return Container(
+          builder: (context, child) => Container(
               height: widget.height,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(widget.height / 2),
@@ -192,8 +187,6 @@ class _AttributeBarState extends State<AttributeBar>
                               attributeColor,
                             ],
                             stops: const [0.0, 0.5, 1.0],
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
                           ),
                           borderRadius: BorderRadius.circular(
                             widget.height / 2,
@@ -216,8 +209,6 @@ class _AttributeBarState extends State<AttributeBar>
                                 Colors.transparent,
                               ],
                               stops: const [0.0, 0.5, 1.0],
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
                             ),
                           ),
                         ),
@@ -242,8 +233,7 @@ class _AttributeBarState extends State<AttributeBar>
                   ],
                 ),
               ),
-            );
-          },
+            ),
         ),
       ],
     );
@@ -252,20 +242,16 @@ class _AttributeBarState extends State<AttributeBar>
 
 /// A compact attribute display for smaller spaces
 class CompactAttributeBar extends StatelessWidget {
+
+  const CompactAttributeBar({
+    required this.attributeName, required this.currentValue, required this.maxValue, required this.icon, super.key,
+    this.color,
+  });
   final String attributeName;
   final int currentValue;
   final int maxValue;
   final IconData icon;
   final Color? color;
-
-  const CompactAttributeBar({
-    super.key,
-    required this.attributeName,
-    required this.currentValue,
-    required this.maxValue,
-    required this.icon,
-    this.color,
-  });
 
   Color _getAttributeColor(BuildContext context) {
     if (color != null) return color!;
@@ -346,22 +332,18 @@ class CompactAttributeBar extends StatelessWidget {
 
 /// A circular attribute display
 class CircularAttributeBar extends StatefulWidget {
+
+  const CircularAttributeBar({
+    required this.attributeName, required this.currentValue, required this.maxValue, required this.icon, super.key,
+    this.color,
+    this.size = 80,
+  });
   final String attributeName;
   final int currentValue;
   final int maxValue;
   final IconData icon;
   final Color? color;
   final double size;
-
-  const CircularAttributeBar({
-    super.key,
-    required this.attributeName,
-    required this.currentValue,
-    required this.maxValue,
-    required this.icon,
-    this.color,
-    this.size = 80,
-  });
 
   @override
   State<CircularAttributeBar> createState() => _CircularAttributeBarState();
@@ -382,7 +364,7 @@ class _CircularAttributeBarState extends State<CircularAttributeBar>
 
     _progressAnimation =
         Tween<double>(
-          begin: 0.0,
+          begin: 0,
           end: widget.currentValue / widget.maxValue,
         ).animate(
           CurvedAnimation(
@@ -445,8 +427,7 @@ class _CircularAttributeBarState extends State<CircularAttributeBar>
           height: widget.size,
           child: AnimatedBuilder(
             animation: _progressAnimation,
-            builder: (context, child) {
-              return Stack(
+            builder: (context, child) => Stack(
                 alignment: Alignment.center,
                 children: [
                   // Background circle
@@ -454,7 +435,7 @@ class _CircularAttributeBarState extends State<CircularAttributeBar>
                     width: widget.size,
                     height: widget.size,
                     child: CircularProgressIndicator(
-                      value: 1.0,
+                      value: 1,
                       strokeWidth: 6,
                       backgroundColor: Theme.of(
                         context,
@@ -495,8 +476,7 @@ class _CircularAttributeBarState extends State<CircularAttributeBar>
                     ],
                   ),
                 ],
-              );
-            },
+              ),
           ),
         ),
         const SizedBox(height: 8),

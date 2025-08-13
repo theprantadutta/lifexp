@@ -3,6 +3,16 @@ import '../themes/theme_extensions.dart';
 
 /// A customizable XP progress bar with smooth animations
 class XPProgressBar extends StatefulWidget {
+
+  const XPProgressBar({
+    required this.currentXP, required this.maxXP, super.key,
+    this.height = 24,
+    this.borderRadius = 12,
+    this.showText = true,
+    this.label,
+    this.animationDuration = const Duration(milliseconds: 800),
+    this.showGlow = true,
+  });
   final int currentXP;
   final int maxXP;
   final double height;
@@ -11,18 +21,6 @@ class XPProgressBar extends StatefulWidget {
   final String? label;
   final Duration animationDuration;
   final bool showGlow;
-
-  const XPProgressBar({
-    super.key,
-    required this.currentXP,
-    required this.maxXP,
-    this.height = 24,
-    this.borderRadius = 12,
-    this.showText = true,
-    this.label,
-    this.animationDuration = const Duration(milliseconds: 800),
-    this.showGlow = true,
-  });
 
   @override
   State<XPProgressBar> createState() => _XPProgressBarState();
@@ -43,14 +41,14 @@ class _XPProgressBarState extends State<XPProgressBar>
     );
 
     _progressAnimation =
-        Tween<double>(begin: 0.0, end: widget.currentXP / widget.maxXP).animate(
+        Tween<double>(begin: 0, end: widget.currentXP / widget.maxXP).animate(
           CurvedAnimation(
             parent: _animationController,
             curve: Curves.easeOutCubic,
           ),
         );
 
-    _glowAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+    _glowAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
 
@@ -83,8 +81,7 @@ class _XPProgressBarState extends State<XPProgressBar>
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
+  Widget build(BuildContext context) => Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -99,8 +96,7 @@ class _XPProgressBarState extends State<XPProgressBar>
         ],
         AnimatedBuilder(
           animation: _animationController,
-          builder: (context, child) {
-            return Container(
+          builder: (context, child) => Container(
               height: widget.height,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(widget.borderRadius),
@@ -161,8 +157,6 @@ class _XPProgressBarState extends State<XPProgressBar>
                                 Colors.transparent,
                               ],
                               stops: const [0.0, 0.5, 1.0],
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
                             ),
                           ),
                         ),
@@ -195,28 +189,24 @@ class _XPProgressBarState extends State<XPProgressBar>
                   ],
                 ),
               ),
-            );
-          },
+            ),
         ),
       ],
     );
-  }
 }
 
 /// A simplified XP progress bar for smaller spaces
 class CompactXPProgressBar extends StatelessWidget {
+
+  const CompactXPProgressBar({
+    required this.currentXP, required this.maxXP, super.key,
+    this.height = 8,
+    this.width = 100,
+  });
   final int currentXP;
   final int maxXP;
   final double height;
   final double width;
-
-  const CompactXPProgressBar({
-    super.key,
-    required this.currentXP,
-    required this.maxXP,
-    this.height = 8,
-    this.width = 100,
-  });
 
   @override
   Widget build(BuildContext context) {

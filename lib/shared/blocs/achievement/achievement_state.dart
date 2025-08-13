@@ -70,7 +70,7 @@ class AchievementLoaded extends AchievementState {
 
   /// Gets achievements by type
   Map<AchievementType, List<Achievement>> get achievementsByType {
-    final Map<AchievementType, List<Achievement>> typedAchievements = {};
+    final typedAchievements = <AchievementType, List<Achievement>>{};
     for (final type in AchievementType.values) {
       typedAchievements[type] = displayAchievements
           .where((achievement) => achievement.type == type)
@@ -81,7 +81,7 @@ class AchievementLoaded extends AchievementState {
 
   /// Gets achievements by badge tier
   Map<BadgeTier, List<Achievement>> get achievementsByTier {
-    final Map<BadgeTier, List<Achievement>> tieredAchievements = {};
+    final tieredAchievements = <BadgeTier, List<Achievement>>{};
     for (final tier in BadgeTier.values) {
       tieredAchievements[tier] = displayAchievements
           .where((achievement) => achievement.badgeTier == tier)
@@ -152,15 +152,15 @@ class AchievementLoaded extends AchievementState {
 
   /// Clears unlock notification state
   AchievementLoaded clearUnlockNotification() =>
-      copyWith(showUnlockNotification: false, unlockedAchievement: null);
+      copyWith(showUnlockNotification: false);
 
   /// Clears celebration state
   AchievementLoaded clearCelebration() =>
-      copyWith(showCelebration: false, celebratingAchievement: null);
+      copyWith(showCelebration: false);
 
   /// Clears filters
   AchievementLoaded clearFilters() =>
-      copyWith(filteredAchievements: null, activeFilter: null, searchQuery: '');
+      copyWith(searchQuery: '');
 
   /// Clears progress updates
   AchievementLoaded clearProgressUpdates() =>

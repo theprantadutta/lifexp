@@ -3,14 +3,21 @@ import 'dart:convert';
 
 import 'package:drift/drift.dart';
 
+import '../../shared/services/offline_manager.dart';
 import '../database/database.dart';
 import '../models/avatar.dart';
+import '../models/sync_operation.dart';
 
 /// Repository for managing avatar data with intelligent caching
 class AvatarRepository {
-  AvatarRepository({required LifeXPDatabase database}) : _database = database;
+  AvatarRepository({
+    required LifeXPDatabase database,
+    OfflineManager? offlineManager,
+  }) : _database = database,
+       _offlineManager = offlineManager ?? OfflineManager();
 
   final LifeXPDatabase _database;
+  final OfflineManager _offlineManager;
 
   // Cache for frequently accessed avatar data
   final Map<String, Avatar> _avatarCache = {};
@@ -76,6 +83,15 @@ class AvatarRepository {
     final companion = _convertToCompanion(avatar, userId);
     await _database.avatarDao.createAvatar(companion);
 
+    // Queue for sync
+    await _queueSyncOperation(
+      SyncOperation.create(
+        entityType: 'avatar',
+        entityId: avatarId,
+        data: avatar.toMap()..['userId'] = userId,
+      ),
+    );
+
     // Cache the new avatar
     _cacheAvatar(userId, avatar);
     _cacheAvatarById(avatarId, avatar);
@@ -102,6 +118,15 @@ class AvatarRepository {
     if (avatarData == null) return null;
 
     final finalAvatar = _convertFromData(avatarData);
+
+    // Queue for sync
+    await _queueSyncOperation(
+      SyncOperation.update(
+        entityType: 'avatar',
+        entityId: avatarId,
+        data: finalAvatar.toMap()..['userId'] = avatarData.userId,
+      ),
+    );
 
     // Update cache
     _updateCacheForAvatar(finalAvatar);
@@ -192,9 +217,7 @@ class AvatarRepository {
   }
 
   /// Gets avatar statistics
-  Future<Map<String, dynamic>> getAvatarStats(String avatarId) async {
-    return _database.avatarDao.getAvatarStats(avatarId);
-  }
+  Future<Map<String, dynamic>> getAvatarStats(String avatarId) async => _database.avatarDao.getAvatarStats(avatarId);
 
   /// Calculates XP bonus based on consistency and difficulty
   int calculateXPBonus({
@@ -396,8 +419,7 @@ class AvatarRepository {
   }
 
   /// Converts Avatar model to database companion
-  AvatarsCompanion _convertToCompanion(Avatar avatar, String userId) {
-    return AvatarsCompanion.insert(
+  AvatarsCompanion _convertToCompanion(Avatar avatar, String userId) => AvatarsCompanion.insert(
       id: avatar.id,
       userId: userId,
       name: avatar.name,
@@ -411,10 +433,17 @@ class AvatarRepository {
       createdAt: avatar.createdAt,
       updatedAt: avatar.updatedAt,
     );
-  }
 
   /// Generates unique ID
-  String _generateId() {
-    return DateTime.now().millisecondsSinceEpoch.toString();
+  String _generateId() => DateTime.now().millisecondsSinceEpoch.toString();
+
+  /// Queue sync operation for offline support
+  Future<void> _queueSyncOperation(SyncOperation operation) async {
+    try {
+      await _offlineManager.queueSyncOperation(operation);
+    } catch (e) {
+      print('AvatarRepository: Failed to queue sync operation: $e');
+      // Continue execution - offline support is not critical for core functionality
+    }
   }
 }

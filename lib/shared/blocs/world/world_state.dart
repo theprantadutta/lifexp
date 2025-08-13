@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-import '../../../data/models/world.dart';
+import '../../../data/models/world_tile.dart';
 import 'world_event.dart';
 
 /// Base class for all world states
@@ -80,7 +80,7 @@ class WorldLoaded extends WorldState {
 
   /// Gets tiles by type
   Map<TileType, List<WorldTile>> get tilesByType {
-    final Map<TileType, List<WorldTile>> typedTiles = {};
+    final typedTiles = <TileType, List<WorldTile>>{};
     for (final type in TileType.values) {
       typedTiles[type] = displayTiles
           .where((tile) => tile.type == type)
@@ -91,7 +91,7 @@ class WorldLoaded extends WorldState {
 
   /// Gets tiles by unlock category
   Map<String, List<WorldTile>> get tilesByCategory {
-    final Map<String, List<WorldTile>> categorizedTiles = {};
+    final categorizedTiles = <String, List<WorldTile>>{};
     for (final tile in displayTiles) {
       if (tile.unlockCategory != null) {
         final category = tile.unlockCategory!;
@@ -124,8 +124,7 @@ class WorldLoaded extends WorldState {
   List<WorldTile> getUnlockableTiles(
     int currentXP,
     Map<String, int> categoryProgress,
-  ) {
-    return lockedTiles
+  ) => lockedTiles
         .where(
           (tile) => tile.canUnlock(
             currentXP: currentXP,
@@ -133,11 +132,9 @@ class WorldLoaded extends WorldState {
           ),
         )
         .toList();
-  }
 
   /// Gets tiles in a specific area
-  List<WorldTile> getTilesInArea(int minX, int maxX, int minY, int maxY) {
-    return displayTiles
+  List<WorldTile> getTilesInArea(int minX, int maxX, int minY, int maxY) => displayTiles
         .where(
           (tile) =>
               tile.positionX >= minX &&
@@ -146,16 +143,13 @@ class WorldLoaded extends WorldState {
               tile.positionY <= maxY,
         )
         .toList();
-  }
 
   /// Gets tiles adjacent to a position
-  List<WorldTile> getAdjacentTiles(int x, int y) {
-    return displayTiles.where((tile) {
+  List<WorldTile> getAdjacentTiles(int x, int y) => displayTiles.where((tile) {
       final dx = (tile.positionX - x).abs();
       final dy = (tile.positionY - y).abs();
       return (dx <= 1 && dy <= 1) && !(dx == 0 && dy == 0);
     }).toList();
-  }
 
   /// Gets world bounds
   WorldBounds get worldBounds {
@@ -252,7 +246,7 @@ class WorldLoaded extends WorldState {
 
   /// Clears tile unlock notification
   WorldLoaded clearTileUnlockNotification() =>
-      copyWith(showTileUnlockNotification: false, unlockedTile: null);
+      copyWith(showTileUnlockNotification: false);
 
   /// Clears progression celebration
   WorldLoaded clearProgressionCelebration() =>
@@ -260,7 +254,7 @@ class WorldLoaded extends WorldState {
 
   /// Clears filters
   WorldLoaded clearFilters() =>
-      copyWith(filteredTiles: null, activeFilter: null);
+      copyWith();
 }
 
 /// State when world operation fails

@@ -55,20 +55,19 @@ class GamificationIcons {
 
 /// Custom icon widget with gamification styling
 class GamificationIcon extends StatelessWidget {
-  final IconData icon;
-  final double? size;
-  final Color? color;
-  final bool isActive;
-  final bool showGlow;
 
   const GamificationIcon({
-    super.key,
-    required this.icon,
+    required this.icon, super.key,
     this.size,
     this.color,
     this.isActive = false,
     this.showGlow = false,
   });
+  final IconData icon;
+  final double? size;
+  final Color? color;
+  final bool isActive;
+  final bool showGlow;
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +81,7 @@ class GamificationIcon extends StatelessWidget {
     Widget iconWidget = Icon(icon, size: size ?? 24, color: iconColor);
 
     if (showGlow && isActive) {
-      iconWidget = Container(
+      iconWidget = DecoratedBox(
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(

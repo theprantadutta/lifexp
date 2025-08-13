@@ -3,6 +3,16 @@ import '../themes/theme_extensions.dart';
 
 /// A badge widget for displaying achievements with unlock animations
 class AchievementBadge extends StatefulWidget {
+
+  const AchievementBadge({
+    required this.title, required this.description, required this.iconPath, super.key,
+    this.tier = 'bronze',
+    this.isUnlocked = false,
+    this.unlockedAt,
+    this.onTap,
+    this.size = 80,
+    this.showUnlockAnimation = true,
+  });
   final String title;
   final String description;
   final String iconPath;
@@ -12,19 +22,6 @@ class AchievementBadge extends StatefulWidget {
   final VoidCallback? onTap;
   final double size;
   final bool showUnlockAnimation;
-
-  const AchievementBadge({
-    super.key,
-    required this.title,
-    required this.description,
-    required this.iconPath,
-    this.tier = 'bronze',
-    this.isUnlocked = false,
-    this.unlockedAt,
-    this.onTap,
-    this.size = 80,
-    this.showUnlockAnimation = true,
-  });
 
   @override
   State<AchievementBadge> createState() => _AchievementBadgeState();
@@ -53,28 +50,28 @@ class _AchievementBadgeState extends State<AchievementBadge>
       vsync: this,
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+    _scaleAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
         parent: _unlockController,
-        curve: const Interval(0.0, 0.6, curve: Curves.elasticOut),
+        curve: const Interval(0, 0.6, curve: Curves.elasticOut),
       ),
     );
 
-    _rotationAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+    _rotationAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
         parent: _unlockController,
         curve: const Interval(0.2, 0.8, curve: Curves.easeInOut),
       ),
     );
 
-    _glowAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+    _glowAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
         parent: _unlockController,
-        curve: const Interval(0.4, 1.0, curve: Curves.easeOut),
+        curve: const Interval(0.4, 1, curve: Curves.easeOut),
       ),
     );
 
-    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
+    _pulseAnimation = Tween<double>(begin: 1, end: 1.1).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
 
@@ -110,8 +107,7 @@ class _AchievementBadgeState extends State<AchievementBadge>
       onTap: widget.onTap,
       child: AnimatedBuilder(
         animation: Listenable.merge([_unlockController, _pulseController]),
-        builder: (context, child) {
-          return Transform.scale(
+        builder: (context, child) => Transform.scale(
             scale: widget.isUnlocked
                 ? _scaleAnimation.value * _pulseAnimation.value
                 : 1.0,
@@ -227,8 +223,7 @@ class _AchievementBadgeState extends State<AchievementBadge>
                 ),
               ),
             ),
-          );
-        },
+          ),
       ),
     );
   }
@@ -236,18 +231,17 @@ class _AchievementBadgeState extends State<AchievementBadge>
 
 /// A compact achievement badge for lists
 class CompactAchievementBadge extends StatelessWidget {
-  final String title;
-  final String tier;
-  final bool isUnlocked;
-  final VoidCallback? onTap;
 
   const CompactAchievementBadge({
-    super.key,
-    required this.title,
+    required this.title, super.key,
     this.tier = 'bronze',
     this.isUnlocked = false,
     this.onTap,
   });
+  final String title;
+  final String tier;
+  final bool isUnlocked;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -301,6 +295,15 @@ class CompactAchievementBadge extends StatelessWidget {
 
 /// Achievement badge with detailed information
 class DetailedAchievementBadge extends StatelessWidget {
+
+  const DetailedAchievementBadge({
+    required this.title, required this.description, super.key,
+    this.tier = 'bronze',
+    this.isUnlocked = false,
+    this.unlockedAt,
+    this.progress = 0.0,
+    this.onTap,
+  });
   final String title;
   final String description;
   final String tier;
@@ -308,17 +311,6 @@ class DetailedAchievementBadge extends StatelessWidget {
   final DateTime? unlockedAt;
   final double progress;
   final VoidCallback? onTap;
-
-  const DetailedAchievementBadge({
-    super.key,
-    required this.title,
-    required this.description,
-    this.tier = 'bronze',
-    this.isUnlocked = false,
-    this.unlockedAt,
-    this.progress = 0.0,
-    this.onTap,
-  });
 
   @override
   Widget build(BuildContext context) {

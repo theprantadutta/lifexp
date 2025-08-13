@@ -45,11 +45,16 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     try {
       final tasks = await _taskRepository.getTasksByUserId(event.userId);
       emit(TaskLoaded(tasks: tasks));
-    } on Exception catch (e) {
+    } on Exception catch (e, stackTrace) {
+      // Log the actual error for debugging
+      print('TaskBloc: Failed to load tasks for user ${event.userId}');
+      print('Error: $e');
+      print('Stack trace: $stackTrace');
+
       emit(
-        TaskError(
-          message: 'Failed to load tasks: ${e.toString()}',
-          errorType: TaskErrorType.general,
+        const TaskError(
+          message:
+              'Unable to load your tasks. Please check your connection and try again.',
         ),
       );
     }
@@ -58,7 +63,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
   /// Handles creating a new task
   Future<void> _onCreateTask(CreateTask event, Emitter<TaskState> emit) async {
     final currentState = state;
-    List<Task> currentTasks = [];
+    var currentTasks = <Task>[];
 
     if (currentState is TaskLoaded) {
       currentTasks = currentState.tasks;
@@ -80,12 +85,16 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
 
       final updatedTasks = [...currentTasks, newTask];
       emit(TaskLoaded(tasks: updatedTasks));
-    } on Exception catch (e) {
+    } on Exception catch (e, stackTrace) {
+      // Log the actual error for debugging
+      print('TaskBloc: Failed to create task');
+      print('Error: $e');
+      print('Stack trace: $stackTrace');
+
       emit(
         TaskError(
-          message: 'Failed to create task: ${e.toString()}',
+          message: 'Unable to create task. Please try again.',
           tasks: currentTasks,
-          errorType: TaskErrorType.general,
         ),
       );
     }
@@ -126,12 +135,16 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
           .toList();
 
       emit(currentState.copyWith(tasks: updatedTasks));
-    } on Exception catch (e) {
+    } on Exception catch (e, stackTrace) {
+      // Log the actual error for debugging
+      print('TaskBloc: Failed to update task');
+      print('Error: $e');
+      print('Stack trace: $stackTrace');
+
       emit(
         TaskError(
-          message: 'Failed to update task: ${e.toString()}',
+          message: 'Unable to update task. Please try again.',
           tasks: currentState.tasks,
-          errorType: TaskErrorType.general,
         ),
       );
     }
@@ -164,7 +177,6 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
           TaskError(
             message: 'Failed to complete task',
             tasks: currentState.tasks,
-            errorType: TaskErrorType.general,
           ),
         );
         return;
@@ -197,19 +209,22 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
           activeFilter: currentState.activeFilter,
           sortType: currentState.sortType,
           searchQuery: currentState.searchQuery,
-          completingTasks: const [],
           showCompletionAnimation: true,
           completedTaskId: event.taskId,
           streakBonuses: {event.taskId: streakBonus},
           xpRewards: {event.taskId: totalXPReward},
         ),
       );
-    } on Exception catch (e) {
+    } on Exception catch (e, stackTrace) {
+      // Log the actual error for debugging
+      print('TaskBloc: Failed to complete task');
+      print('Error: $e');
+      print('Stack trace: $stackTrace');
+
       emit(
         TaskError(
-          message: 'Failed to complete task: ${e.toString()}',
+          message: 'Unable to complete task. Please try again.',
           tasks: currentState.tasks,
-          errorType: TaskErrorType.general,
         ),
       );
     }
@@ -240,7 +255,6 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
           TaskError(
             message: 'Failed to complete tasks',
             tasks: currentState.tasks,
-            errorType: TaskErrorType.general,
           ),
         );
         return;
@@ -293,7 +307,6 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
         TaskError(
           message: 'Failed to batch complete tasks: ${e.toString()}',
           tasks: currentState.tasks,
-          errorType: TaskErrorType.general,
         ),
       );
     }
@@ -317,11 +330,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
 
       if (!success) {
         emit(
-          TaskError(
-            message: 'Failed to reset task',
-            tasks: currentState.tasks,
-            errorType: TaskErrorType.general,
-          ),
+          TaskError(message: 'Failed to reset task', tasks: currentState.tasks),
         );
         return;
       }
@@ -333,7 +342,6 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
           TaskError(
             message: 'Failed to refresh task after reset',
             tasks: currentState.tasks,
-            errorType: TaskErrorType.general,
           ),
         );
         return;
@@ -349,7 +357,6 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
         TaskError(
           message: 'Failed to reset task: ${e.toString()}',
           tasks: currentState.tasks,
-          errorType: TaskErrorType.general,
         ),
       );
     }
@@ -379,7 +386,6 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
           TaskError(
             message: 'Failed to delete task',
             tasks: currentState.tasks,
-            errorType: TaskErrorType.general,
           ),
         );
         return;
@@ -390,12 +396,16 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
           .toList();
 
       emit(currentState.copyWith(tasks: updatedTasks));
-    } on Exception catch (e) {
+    } on Exception catch (e, stackTrace) {
+      // Log the actual error for debugging
+      print('TaskBloc: Failed to delete task');
+      print('Error: $e');
+      print('Stack trace: $stackTrace');
+
       emit(
         TaskError(
-          message: 'Failed to delete task: ${e.toString()}',
+          message: 'Unable to delete task. Please try again.',
           tasks: currentState.tasks,
-          errorType: TaskErrorType.general,
         ),
       );
     }
@@ -423,12 +433,16 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
           activeFilter: filter,
         ),
       );
-    } on Exception catch (e) {
+    } on Exception catch (e, stackTrace) {
+      // Log the actual error for debugging
+      print('TaskBloc: Failed to filter tasks by category');
+      print('Error: $e');
+      print('Stack trace: $stackTrace');
+
       emit(
         TaskError(
-          message: 'Failed to filter tasks: ${e.toString()}',
+          message: 'Unable to filter tasks. Please try again.',
           tasks: currentState.tasks,
-          errorType: TaskErrorType.general,
         ),
       );
     }
@@ -461,7 +475,6 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
         TaskError(
           message: 'Failed to filter tasks: ${e.toString()}',
           tasks: currentState.tasks,
-          errorType: TaskErrorType.general,
         ),
       );
     }
@@ -480,7 +493,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
         event.userId,
       );
 
-      final filter = const TaskFilter(isCompleted: true);
+      const filter = TaskFilter(isCompleted: true);
 
       emit(
         currentState.copyWith(
@@ -493,7 +506,6 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
         TaskError(
           message: 'Failed to load completed tasks: ${e.toString()}',
           tasks: currentState.tasks,
-          errorType: TaskErrorType.general,
         ),
       );
     }
@@ -510,7 +522,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     try {
       final pendingTasks = await _taskRepository.getPendingTasks(event.userId);
 
-      final filter = const TaskFilter(isCompleted: false);
+      const filter = TaskFilter(isCompleted: false);
 
       emit(
         currentState.copyWith(
@@ -523,7 +535,6 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
         TaskError(
           message: 'Failed to load pending tasks: ${e.toString()}',
           tasks: currentState.tasks,
-          errorType: TaskErrorType.general,
         ),
       );
     }
@@ -542,7 +553,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
         event.userId,
       );
 
-      final filter = const TaskFilter(isDueToday: true);
+      const filter = TaskFilter(isDueToday: true);
 
       emit(
         currentState.copyWith(
@@ -555,7 +566,6 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
         TaskError(
           message: 'Failed to load tasks due today: ${e.toString()}',
           tasks: currentState.tasks,
-          errorType: TaskErrorType.general,
         ),
       );
     }
@@ -572,7 +582,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     try {
       final overdueTasks = await _taskRepository.getOverdueTasks(event.userId);
 
-      final filter = const TaskFilter(isOverdue: true);
+      const filter = TaskFilter(isOverdue: true);
 
       emit(
         currentState.copyWith(
@@ -585,7 +595,6 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
         TaskError(
           message: 'Failed to load overdue tasks: ${e.toString()}',
           tasks: currentState.tasks,
-          errorType: TaskErrorType.general,
         ),
       );
     }
@@ -604,7 +613,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
         event.userId,
       );
 
-      final filter = const TaskFilter(hasStreak: true);
+      const filter = TaskFilter(hasStreak: true);
 
       emit(
         currentState.copyWith(
@@ -617,7 +626,6 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
         TaskError(
           message: 'Failed to load tasks with streaks: ${e.toString()}',
           tasks: currentState.tasks,
-          errorType: TaskErrorType.general,
         ),
       );
     }
@@ -650,7 +658,6 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
           TaskError(
             message: 'Failed to update task difficulty',
             tasks: currentState.tasks,
-            errorType: TaskErrorType.general,
           ),
         );
         return;
@@ -663,7 +670,6 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
           TaskError(
             message: 'Failed to refresh task after difficulty update',
             tasks: currentState.tasks,
-            errorType: TaskErrorType.general,
           ),
         );
         return;
@@ -679,7 +685,6 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
         TaskError(
           message: 'Failed to update task difficulty: ${e.toString()}',
           tasks: currentState.tasks,
-          errorType: TaskErrorType.general,
         ),
       );
     }
@@ -722,7 +727,6 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
           TaskError(
             message: 'Failed to refresh task after streak break',
             tasks: currentState.tasks,
-            errorType: TaskErrorType.general,
           ),
         );
         return;
@@ -738,7 +742,6 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
         TaskError(
           message: 'Failed to break task streak: ${e.toString()}',
           tasks: currentState.tasks,
-          errorType: TaskErrorType.general,
         ),
       );
     }
@@ -772,7 +775,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     if (currentState is! TaskLoaded) return;
 
     if (event.query.isEmpty) {
-      emit(currentState.copyWith(filteredTasks: null, searchQuery: ''));
+      emit(currentState.copyWith(searchQuery: ''));
       return;
     }
 
@@ -807,12 +810,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
         emit(TaskLoaded(tasks: tasks));
       }
     } on Exception catch (e) {
-      emit(
-        TaskError(
-          message: 'Failed to refresh tasks: ${e.toString()}',
-          errorType: TaskErrorType.general,
-        ),
-      );
+      emit(TaskError(message: 'Failed to refresh tasks: ${e.toString()}'));
     }
   }
 

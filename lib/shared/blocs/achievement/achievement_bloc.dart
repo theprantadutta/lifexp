@@ -59,7 +59,6 @@ class AchievementBloc extends Bloc<AchievementEvent, AchievementState> {
       emit(
         AchievementError(
           message: 'Failed to load achievements: ${e.toString()}',
-          errorType: AchievementErrorType.general,
         ),
       );
     }
@@ -77,7 +76,7 @@ class AchievementBloc extends Bloc<AchievementEvent, AchievementState> {
       final unlockedAchievements = await _achievementRepository
           .getUnlockedAchievements(event.userId);
 
-      final filter = const AchievementFilter(isUnlocked: true);
+      const filter = AchievementFilter(isUnlocked: true);
 
       emit(
         currentState.copyWith(
@@ -90,7 +89,6 @@ class AchievementBloc extends Bloc<AchievementEvent, AchievementState> {
         AchievementError(
           message: 'Failed to load unlocked achievements: ${e.toString()}',
           achievements: currentState.achievements,
-          errorType: AchievementErrorType.general,
         ),
       );
     }
@@ -108,7 +106,7 @@ class AchievementBloc extends Bloc<AchievementEvent, AchievementState> {
       final lockedAchievements = await _achievementRepository
           .getLockedAchievements(event.userId);
 
-      final filter = const AchievementFilter(isUnlocked: false);
+      const filter = AchievementFilter(isUnlocked: false);
 
       emit(
         currentState.copyWith(
@@ -121,7 +119,6 @@ class AchievementBloc extends Bloc<AchievementEvent, AchievementState> {
         AchievementError(
           message: 'Failed to load locked achievements: ${e.toString()}',
           achievements: currentState.achievements,
-          errorType: AchievementErrorType.general,
         ),
       );
     }
@@ -152,7 +149,6 @@ class AchievementBloc extends Bloc<AchievementEvent, AchievementState> {
         AchievementError(
           message: 'Failed to load achievements by type: ${e.toString()}',
           achievements: currentState.achievements,
-          errorType: AchievementErrorType.general,
         ),
       );
     }
@@ -164,7 +160,7 @@ class AchievementBloc extends Bloc<AchievementEvent, AchievementState> {
     Emitter<AchievementState> emit,
   ) async {
     final currentState = state;
-    List<Achievement> currentAchievements = [];
+    var currentAchievements = <Achievement>[];
 
     if (currentState is AchievementLoaded) {
       currentAchievements = currentState.achievements;
@@ -190,7 +186,6 @@ class AchievementBloc extends Bloc<AchievementEvent, AchievementState> {
         AchievementError(
           message: 'Failed to create achievement: ${e.toString()}',
           achievements: currentAchievements,
-          errorType: AchievementErrorType.general,
         ),
       );
     }
@@ -232,7 +227,6 @@ class AchievementBloc extends Bloc<AchievementEvent, AchievementState> {
           AchievementError(
             message: 'Failed to update achievement progress',
             achievements: currentState.achievements,
-            errorType: AchievementErrorType.general,
           ),
         );
         return;
@@ -271,7 +265,6 @@ class AchievementBloc extends Bloc<AchievementEvent, AchievementState> {
         AchievementError(
           message: 'Failed to update achievement progress: ${e.toString()}',
           achievements: currentState.achievements,
-          errorType: AchievementErrorType.general,
         ),
       );
     }
@@ -311,7 +304,6 @@ class AchievementBloc extends Bloc<AchievementEvent, AchievementState> {
           AchievementError(
             message: 'Failed to increment achievement progress',
             achievements: currentState.achievements,
-            errorType: AchievementErrorType.general,
           ),
         );
         return;
@@ -350,7 +342,6 @@ class AchievementBloc extends Bloc<AchievementEvent, AchievementState> {
         AchievementError(
           message: 'Failed to increment achievement progress: ${e.toString()}',
           achievements: currentState.achievements,
-          errorType: AchievementErrorType.general,
         ),
       );
     }
@@ -389,7 +380,6 @@ class AchievementBloc extends Bloc<AchievementEvent, AchievementState> {
           AchievementError(
             message: 'Failed to unlock achievement',
             achievements: currentState.achievements,
-            errorType: AchievementErrorType.general,
           ),
         );
         return;
@@ -404,7 +394,6 @@ class AchievementBloc extends Bloc<AchievementEvent, AchievementState> {
           AchievementError(
             message: 'Failed to refresh achievement after unlock',
             achievements: currentState.achievements,
-            errorType: AchievementErrorType.general,
           ),
         );
         return;
@@ -438,7 +427,6 @@ class AchievementBloc extends Bloc<AchievementEvent, AchievementState> {
         AchievementError(
           message: 'Failed to unlock achievement: ${e.toString()}',
           achievements: currentState.achievements,
-          errorType: AchievementErrorType.general,
         ),
       );
     }
@@ -659,7 +647,6 @@ class AchievementBloc extends Bloc<AchievementEvent, AchievementState> {
         AchievementError(
           message: 'Failed to load recent unlocks: ${e.toString()}',
           achievements: currentState.achievements,
-          errorType: AchievementErrorType.general,
         ),
       );
     }
@@ -677,7 +664,7 @@ class AchievementBloc extends Bloc<AchievementEvent, AchievementState> {
       final unlockableAchievements = await _achievementRepository
           .getUnlockableAchievements(event.userId);
 
-      final filter = const AchievementFilter(canUnlock: true);
+      const filter = AchievementFilter(canUnlock: true);
 
       emit(
         currentState.copyWith(
@@ -690,7 +677,6 @@ class AchievementBloc extends Bloc<AchievementEvent, AchievementState> {
         AchievementError(
           message: 'Failed to load unlockable achievements: ${e.toString()}',
           achievements: currentState.achievements,
-          errorType: AchievementErrorType.general,
         ),
       );
     }
@@ -716,7 +702,6 @@ class AchievementBloc extends Bloc<AchievementEvent, AchievementState> {
       emit(
         AchievementError(
           message: 'Failed to create default achievements: ${e.toString()}',
-          errorType: AchievementErrorType.general,
         ),
       );
     }
@@ -742,7 +727,6 @@ class AchievementBloc extends Bloc<AchievementEvent, AchievementState> {
       emit(
         AchievementError(
           message: 'Failed to refresh achievements: ${e.toString()}',
-          errorType: AchievementErrorType.general,
         ),
       );
     }
@@ -829,7 +813,7 @@ class AchievementBloc extends Bloc<AchievementEvent, AchievementState> {
     if (currentState is! AchievementLoaded) return;
 
     if (event.query.isEmpty) {
-      emit(currentState.copyWith(filteredAchievements: null, searchQuery: ''));
+      emit(currentState.copyWith(searchQuery: ''));
       return;
     }
 

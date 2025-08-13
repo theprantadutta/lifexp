@@ -52,6 +52,9 @@ dependencies:
   firebase_storage: ^11.5.6
   
   # Animations
+  flutter_animate: ^4.2.0
+  
+  # Animations
   lottie: ^2.7.0
   rive: ^0.12.4
   
@@ -71,6 +74,7 @@ dependencies:
   # HTTP and networking
   http: ^1.1.2
   dio: ^5.4.0
+  shimmer: ^3.0.0
 
 dev_dependencies:
   flutter_test:

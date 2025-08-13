@@ -54,8 +54,8 @@ class Tasks extends Table {
   List<String> get customConstraints => [
     'CHECK (length(title) >= 1 AND length(title) <= 100)',
     'CHECK (length(description) <= 500)',
-    'CHECK (type IN ("daily", "weekly", "longTerm"))',
-    'CHECK (category IN ("health", "finance", "work", "custom"))',
+    "CHECK (type IN ('daily', 'weekly', 'longTerm'))",
+    "CHECK (category IN ('health', 'finance', 'work', 'custom'))",
     'CHECK (xp_reward > 0)',
     'CHECK (difficulty >= 1 AND difficulty <= 10)',
     'CHECK (streak_count >= 0)',

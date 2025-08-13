@@ -6,9 +6,6 @@ import 'theme_state.dart';
 
 /// BLoC for managing app theme state
 class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
-  static const String _themeTypeKey = 'theme_type';
-  static const String _isDarkModeKey = 'is_dark_mode';
-  static const String _unlockedThemesKey = 'unlocked_themes';
 
   ThemeBloc() : super(ThemeState.initial()) {
     on<LoadThemeEvent>(_onLoadTheme);
@@ -17,6 +14,9 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
     on<UnlockThemeEvent>(_onUnlockTheme);
     on<ResetThemeEvent>(_onResetTheme);
   }
+  static const String _themeTypeKey = 'theme_type';
+  static const String _isDarkModeKey = 'is_dark_mode';
+  static const String _unlockedThemesKey = 'unlocked_themes';
 
   /// Load theme from storage
   Future<void> _onLoadTheme(
@@ -30,7 +30,7 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
 
       // Load theme type
       final themeTypeString = prefs.getString(_themeTypeKey);
-      LifeXPThemeType themeType = LifeXPThemeType.light;
+      var themeType = LifeXPThemeType.light;
       if (themeTypeString != null) {
         themeType = LifeXPThemeType.values.firstWhere(
           (type) => type.toString() == themeTypeString,
