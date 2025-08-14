@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/material.dart';
 
 /// Service for detecting and monitoring offline/online state
 class OfflineStateDetector {
@@ -18,7 +19,7 @@ class OfflineStateDetector {
   
   ConnectionState _currentState = ConnectionState.unknown;
   Timer? _recheckTimer;
-  StreamSubscription<ConnectivityResult>? _connectivitySubscription;
+  StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
 
   /// Current connection state
   ConnectionState get currentState => _currentState;
@@ -50,10 +51,10 @@ class OfflineStateDetector {
   }
 
   /// Handle connectivity changes
-  Future<void> _onConnectivityChanged(ConnectivityResult result) async {
-    print('OfflineStateDetector: Connectivity changed to $result');
+  Future<void> _onConnectivityChanged(List<ConnectivityResult> results) async {
+    print('OfflineStateDetector: Connectivity changed to $results');
     
-    if (result == ConnectivityResult.none) {
+    if (results.every((result) => result == ConnectivityResult.none)) {
       _updateState(ConnectionState.offline);
     } else {
       // Even if we have connectivity, verify internet access
@@ -64,9 +65,9 @@ class OfflineStateDetector {
   /// Check current connectivity status
   Future<void> _checkConnectivity() async {
     try {
-      final connectivityResult = await _connectivity.checkConnectivity();
+      final connectivityResults = await _connectivity.checkConnectivity();
       
-      if (connectivityResult == ConnectivityResult.none) {
+      if (connectivityResults.every((result) => result == ConnectivityResult.none)) {
         _updateState(ConnectionState.offline);
       } else {
         await _verifyInternetAccess();
@@ -170,12 +171,18 @@ class OfflineStateDetector {
 
   /// Get detailed connection information
   Future<ConnectionInfo> getConnectionInfo() async {
-    final connectivityResult = await _connectivity.checkConnectivity();
+    final connectivityResults = await _connectivity.checkConnectivity();
     final quality = await getConnectionQuality();
+    
+    // Use the first non-none result, or none if all are none
+    final primaryResult = connectivityResults.firstWhere(
+      (result) => result != ConnectivityResult.none,
+      orElse: () => ConnectivityResult.none,
+    );
     
     return ConnectionInfo(
       state: _currentState,
-      type: _mapConnectivityResult(connectivityResult),
+      type: _mapConnectivityResult(primaryResult),
       quality: quality,
       lastChecked: DateTime.now(),
     );

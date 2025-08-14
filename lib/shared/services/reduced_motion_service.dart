@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 /// Service for managing reduced motion accessibility features
 class ReducedMotionService {
   /// Check if reduce motion is enabled system-wide
-  static bool isReduceMotionEnabled(BuildContext context) => MediaQuery.of(context).accessibilityFeatures.reduceMotion;
+  static bool isReduceMotionEnabled(BuildContext context) => MediaQuery.maybeOf(context)?.disableAnimations ?? false;
   
   /// Get animation duration based on reduce motion setting
   static Duration getAnimationDuration(

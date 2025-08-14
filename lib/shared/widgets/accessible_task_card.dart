@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 
-import '../models/task.dart';
+import '../../data/models/task.dart';
 import '../services/accessibility_service.dart';
 
 /// Accessible task card with comprehensive screen reader support

@@ -306,7 +306,6 @@ class AccessibilityService {
     ScrollController? controller,
   }) => Semantics(
       label: semanticLabel,
-      list: true,
       child: ListView(
         controller: controller,
         children: children.asMap().entries.map((entry) {
@@ -328,7 +327,6 @@ class AccessibilityService {
     String? semanticLabel,
   }) => Semantics(
       label: semanticLabel ?? title,
-      dialog: true,
       namesRoute: true,
       child: AlertDialog(
         title: Semantics(

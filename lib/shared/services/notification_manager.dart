@@ -2,47 +2,53 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
+import '../../data/database/database.dart';
 import '../../data/models/task.dart';
 import '../../data/repositories/task_repository.dart';
 import 'notification_service.dart';
 
 /// Manager for intelligent notification scheduling and handling
 class NotificationManager {
-  factory NotificationManager() => _instance;
+  factory NotificationManager({required LifeXPDatabase database}) {
+    _instance._database ??= database;
+    _instance._taskRepository ??= TaskRepository(database: database);
+    return _instance;
+  }
   NotificationManager._internal();
   static final NotificationManager _instance = NotificationManager._internal();
 
   final NotificationService _notificationService = NotificationService();
-  final TaskRepository _taskRepository = TaskRepository();
+  LifeXPDatabase? _database;
+  TaskRepository? _taskRepository;
 
   Timer? _dailyCheckTimer;
   Timer? _streakCheckTimer;
 
   /// Initialize the notification manager
-  Future<void> initialize() async {
+  Future<void> initialize(String userId) async {
     await _notificationService.initialize();
-    _startPeriodicChecks();
+    _startPeriodicChecks(userId);
   }
 
   /// Start periodic checks for notifications
-  void _startPeriodicChecks() {
+  void _startPeriodicChecks(String userId) {
     // Check for daily reminders every hour
     _dailyCheckTimer = Timer.periodic(
       const Duration(hours: 1),
-      (_) => _checkDailyReminders(),
+      (_) => _checkDailyReminders(userId),
     );
 
     // Check for streak warnings every 30 minutes
     _streakCheckTimer = Timer.periodic(
       const Duration(minutes: 30),
-      (_) => _checkStreakWarnings(),
+      (_) => _checkStreakWarnings(userId),
     );
   }
 
   /// Schedule smart task reminders based on user patterns
-  Future<void> scheduleSmartReminders() async {
+  Future<void> scheduleSmartReminders(String userId) async {
     try {
-      final tasks = await _taskRepository.getAllTasks();
+      final tasks = await _taskRepository!.getTasksByUserId(userId);
       final activeTasks = tasks.where((task) => !task.isCompleted).toList();
 
       for (final task in activeTasks) {
@@ -262,10 +268,10 @@ class NotificationManager {
   }
 
   /// Check for daily reminders that need to be sent
-  Future<void> _checkDailyReminders() async {
+  Future<void> _checkDailyReminders(String userId) async {
     try {
       final now = DateTime.now();
-      final tasks = await _taskRepository.getTasksByType(TaskType.daily);
+      final tasks = await _taskRepository!.getTasksByType(userId, TaskType.daily);
       
       for (final task in tasks) {
         if (!task.isCompleted && _shouldSendDailyReminder(task, now)) {
@@ -299,10 +305,10 @@ class NotificationManager {
   }
 
   /// Check for streak warnings that need to be sent
-  Future<void> _checkStreakWarnings() async {
+  Future<void> _checkStreakWarnings(String userId) async {
     try {
       final now = DateTime.now();
-      final tasks = await _taskRepository.getTasksWithStreaks();
+      final tasks = await _taskRepository!.getTasksWithStreaks(userId);
       
       for (final task in tasks) {
         if (task.streakCount > 0 && _shouldSendStreakWarning(task, now)) {

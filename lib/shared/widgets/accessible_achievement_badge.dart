@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 
-import '../models/achievement.dart';
+import '../../data/models/achievement.dart';
 import '../services/accessibility_service.dart';
 
 /// Accessible achievement badge with comprehensive screen reader support
@@ -27,10 +28,10 @@ class AccessibleAchievementBadge extends StatelessWidget {
     final accessibilityService = AccessibilityService();
     
     final semanticLabel = accessibilityService.createAchievementLabel(
-      name: achievement.name,
+      name: achievement.title,
       description: achievement.description,
       isUnlocked: achievement.isUnlocked,
-      progress: achievement.progress,
+      progress: achievement.progress.toDouble(),
     );
     
     return Semantics(
@@ -105,7 +106,7 @@ class AccessibleAchievementBadge extends StatelessWidget {
                       child: Semantics(
                         excludeSemantics: true,
                         child: CircularProgressIndicator(
-                          value: achievement.progress,
+                          value: achievement.progress.toDouble(),
                           strokeWidth: 3,
                           backgroundColor: Colors.transparent,
                           valueColor: AlwaysStoppedAnimation(
@@ -149,7 +150,7 @@ class AccessibleAchievementBadge extends StatelessWidget {
                 Semantics(
                   header: true,
                   child: Text(
-                    achievement.name,
+                    achievement.title,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: achievement.isUnlocked
@@ -221,11 +222,11 @@ class AccessibleAchievementBadge extends StatelessWidget {
 
   IconData _getAchievementIcon(AchievementType type) {
     switch (type) {
-      case AchievementType.completion:
+      case AchievementType.total:
         return Icons.task_alt;
       case AchievementType.streak:
         return Icons.local_fire_department;
-      case AchievementType.xp:
+      case AchievementType.level:
         return Icons.stars;
       case AchievementType.category:
         return Icons.category;

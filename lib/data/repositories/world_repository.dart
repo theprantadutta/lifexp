@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 
 import '../database/database.dart';
-import '../models/world_tile.dart';
+import '../models/world.dart';
 
 /// Repository for managing world data with tile unlocking logic
 class WorldRepository {
@@ -116,8 +116,8 @@ class WorldRepository {
     required String imagePath,
     required TileType type,
     required int unlockRequirement,
-    required int x,
-    required int y,
+    required int positionX,
+    required int positionY,
     String description = '',
     String? unlockCategory,
     Map<String, dynamic> customProperties = const {},
@@ -126,11 +126,14 @@ class WorldRepository {
     final tile = WorldTile.create(
       id: tileId,
       name: name,
+      imagePath: imagePath,
       type: type,
       unlockRequirement: unlockRequirement,
-      x: x,
-      y: y,
+      positionX: positionX,
+      positionY: positionY,
       description: description,
+      unlockCategory: unlockCategory,
+      customProperties: customProperties,
     );
 
     final companion = _convertToCompanion(tile, userId);
@@ -156,7 +159,10 @@ class WorldRepository {
     }
 
     // Validate unlock conditions
-    if (!currentTile.canUnlock(currentXP, categoryProgress)) {
+    if (!currentTile.canUnlock(
+      currentXP: currentXP,
+      categoryProgress: categoryProgress,
+    )) {
       return null;
     }
 
@@ -320,10 +326,11 @@ class WorldRepository {
       final tile = WorldTile.create(
         id: _generateId(),
         name: tileData['name'] as String,
+        imagePath: 'assets/images/world/${(tileData['type'] as TileType).name}.png',
         type: tileData['type'] as TileType,
         unlockRequirement: tileData['unlockRequirement'] as int,
-        x: tileData['x'] as int,
-        y: tileData['y'] as int,
+        positionX: tileData['x'] as int,
+        positionY: tileData['y'] as int,
         description: tileData['description'] as String? ?? '',
       );
       return _convertToCompanion(tile, userId);
@@ -342,7 +349,7 @@ class WorldRepository {
   ) {
     final placements = <Map<String, int>>[];
     final occupiedPositions = existingTiles
-        .map((tile) => '${tile.x},${tile.y}')
+        .map((tile) => '${tile.positionX},${tile.positionY}')
         .toSet();
 
     // Simple spiral placement algorithm
@@ -665,13 +672,17 @@ class WorldRepository {
       id: data.id,
       name: data.name,
       description: data.description,
+      imagePath: data.imagePath,
       type: TileType.values.byName(data.tileType),
       isUnlocked: data.isUnlocked,
       unlockRequirement: data.unlockRequirement,
-      x: data.positionX, // Map from database field
-      y: data.positionY, // Map from database field
-      rewards: [], // Default empty list
-      customizations: customProperties,
+      unlockCategory: data.unlockCategory,
+      positionX: data.positionX,
+      positionY: data.positionY,
+      unlockedAt: data.unlockedAt,
+      customProperties: customProperties,
+      createdAt: data.createdAt,
+      updatedAt: data.updatedAt,
     );
   }
 
@@ -683,15 +694,17 @@ class WorldRepository {
       userId: userId,
       name: tile.name,
       description: Value(tile.description),
-      imagePath: 'assets/images/world/${tile.type.name}.png', // Default image path
+      imagePath: tile.imagePath,
       tileType: tile.type.name,
       isUnlocked: Value(tile.isUnlocked),
       unlockRequirement: tile.unlockRequirement,
-      positionX: tile.x, // Map to database field
-      positionY: tile.y, // Map to database field
-      customProperties: Value(json.encode(tile.customizations)),
-      createdAt: now,
-      updatedAt: now,
+      unlockCategory: Value(tile.unlockCategory),
+      positionX: tile.positionX,
+      positionY: tile.positionY,
+      unlockedAt: Value(tile.unlockedAt),
+      customProperties: Value(json.encode(tile.customProperties)),
+      createdAt: tile.createdAt,
+      updatedAt: tile.updatedAt,
     );
   }
 

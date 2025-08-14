@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-import '../../../data/models/world_tile.dart';
+import '../../../data/models/world.dart';
 import 'world_event.dart';
 
 /// Base class for all world states

@@ -41,14 +41,14 @@ class OfflineDataManager {
   /// Initialize connectivity monitoring
   Future<void> _initializeConnectivity() async {
     // Check initial connectivity
-    final connectivityResult = await _connectivity.checkConnectivity();
-    _isOnline = connectivityResult != ConnectivityResult.none;
+    final connectivityResults = await _connectivity.checkConnectivity();
+    _isOnline = connectivityResults.any((result) => result != ConnectivityResult.none);
     _connectionController.add(_isOnline);
 
     // Listen for connectivity changes
-    _connectivity.onConnectivityChanged.listen((ConnectivityResult result) {
+    _connectivity.onConnectivityChanged.listen((List<ConnectivityResult> results) {
       final wasOnline = _isOnline;
-      _isOnline = result != ConnectivityResult.none;
+      _isOnline = results.any((result) => result != ConnectivityResult.none);
       
       if (_isOnline != wasOnline) {
         _connectionController.add(_isOnline);

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../data/models/world_tile.dart';
+import '../../../data/models/world.dart';
 
 /// Panel showing world statistics and progress
 class WorldStatsPanel extends StatelessWidget {
@@ -197,6 +197,8 @@ class WorldStatsPanel extends StatelessWidget {
 
   Color _getTileTypeColor(TileType type) {
     switch (type) {
+      case TileType.grass:
+        return Colors.lightGreen;
       case TileType.forest:
         return Colors.green;
       case TileType.mountain:
@@ -207,6 +209,8 @@ class WorldStatsPanel extends StatelessWidget {
         return Colors.orange;
       case TileType.city:
         return Colors.grey;
+      case TileType.building:
+        return Colors.blueGrey;
       case TileType.special:
         return Colors.purple;
     }

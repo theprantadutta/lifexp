@@ -30,6 +30,13 @@ class AuthRepository {
     return null;
   }
 
+  /// Get current authenticated user asynchronously
+  Future<User?> getCurrentUser() async {
+    final firebaseUser = _firebaseAuth.currentUser;
+    if (firebaseUser == null) return null;
+    return await _getUserFromFirestore(firebaseUser.uid);
+  }
+
   /// Sign up with email and password
   Future<User> signUp({
     required String email,

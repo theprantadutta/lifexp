@@ -375,7 +375,7 @@ class AccessiblePieChart extends StatelessWidget {
     final theme = Theme.of(context);
     final accessibilityService = AccessibilityService();
     
-    final total = sections.fold(0, (sum, section) => sum + section.value);
+    final total = sections.fold(0.0, (sum, section) => sum + section.value);
     final chartLabel = 'Pie chart: $title with ${sections.length} sections, total value: ${total.toInt()}';
     
     return Semantics(
@@ -416,10 +416,14 @@ class AccessiblePieChart extends StatelessWidget {
                           touchCallback: (event, response) {
                             if (response?.touchedSection != null) {
                               final section = response!.touchedSection!;
-                              final percentage = ((section.value / total) * 100).round();
-                              accessibilityService.announce(
-                                '${section.title}: ${section.value.toInt()}, $percentage percent'
-                              );
+                              final sectionIndex = section.touchedSectionIndex;
+                              if (sectionIndex >= 0 && sectionIndex < sections.length) {
+                                final sectionData = sections[sectionIndex];
+                                final percentage = ((sectionData.value / total) * 100).round();
+                                accessibilityService.announce(
+                                  '${sectionData.title}: ${sectionData.value.toInt()}, $percentage percent'
+                                );
+                              }
                             }
                           },
                         ),

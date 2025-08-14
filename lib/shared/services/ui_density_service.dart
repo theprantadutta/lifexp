@@ -288,7 +288,7 @@ class DensityAwarePadding extends StatelessWidget {
     this.customDensity,
   });
 
-  const DensityAwarePadding.all(
+  DensityAwarePadding.all(
     double padding, {
     required Widget child, super.key,
     VisualDensity? customDensity,
@@ -296,7 +296,7 @@ class DensityAwarePadding extends StatelessWidget {
        child = child,
        customDensity = customDensity;
 
-  const DensityAwarePadding.symmetric({
+  DensityAwarePadding.symmetric({
     required Widget child, super.key,
     double vertical = 0,
     double horizontal = 0,

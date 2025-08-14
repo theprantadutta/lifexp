@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../data/models/world_tile.dart';
+import '../../../data/models/world.dart';
 
 /// Panel showing information about a selected world tile
 class TileInfoPanel extends StatelessWidget {
@@ -151,28 +151,28 @@ class TileInfoPanel extends StatelessWidget {
             const SizedBox(height: 16),
           ],
 
-          // Rewards
-          if (tile.rewards.isNotEmpty) ...[
+          // Custom Properties
+          if (tile.customProperties.isNotEmpty) ...[
             Text(
-              'Rewards',
+              'Properties',
               style: theme.textTheme.titleSmall?.copyWith(
                 color: colorScheme.onSurface,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 8),
-            ...tile.rewards.map((reward) => Padding(
+            ...tile.customProperties.entries.map((entry) => Padding(
               padding: const EdgeInsets.only(bottom: 4),
               child: Row(
                 children: [
                   Icon(
-                    Icons.card_giftcard,
+                    Icons.info_outline,
                     color: colorScheme.secondary,
                     size: 16,
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    reward,
+                    '${entry.key}: ${entry.value}',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),

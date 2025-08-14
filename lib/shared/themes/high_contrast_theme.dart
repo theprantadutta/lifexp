@@ -41,7 +41,7 @@ class HighContrastTheme {
       ),
       
       // High contrast card theme
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: onPrimaryColor,
         elevation: 4,
         shape: RoundedRectangleBorder(
@@ -215,7 +215,7 @@ class HighContrastTheme {
       ),
       
       // High contrast tab bar theme
-      tabBarTheme: const TabBarTheme(
+      tabBarTheme: const TabBarThemeData(
         labelColor: primaryColor,
         unselectedLabelColor: Color(0xFF808080),
         indicatorColor: primaryColor,
@@ -272,7 +272,7 @@ class HighContrastTheme {
       ),
       
       // High contrast card theme
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: backgroundColor,
         elevation: 4,
         shape: RoundedRectangleBorder(

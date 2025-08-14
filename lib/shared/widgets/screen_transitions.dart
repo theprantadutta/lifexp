@@ -84,7 +84,7 @@ class ScalePageRoute<T> extends PageRouteBuilder<T> {
           reverseTransitionDuration: duration,
           transitionsBuilder: (context, animation, secondaryAnimation, child) => ScaleTransition(
               scale: animation.drive(
-                Tween(begin: 0, end: 1).chain(
+                Tween(begin: 0.0, end: 1.0).chain(
                   CurveTween(curve: curve),
                 ),
               ),

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
+import '../../data/database/database.dart';
 import '../../data/models/achievement.dart';
 import '../../data/models/task.dart';
 import '../../data/repositories/achievement_repository.dart';
@@ -10,14 +11,20 @@ import 'notification_service.dart';
 
 /// Specialized manager for achievement and milestone notifications
 class AchievementNotificationManager {
-  factory AchievementNotificationManager() => _instance;
+  factory AchievementNotificationManager({required LifeXPDatabase database}) {
+    _instance._database ??= database;
+    _instance._achievementRepository ??= AchievementRepository(database: database);
+    _instance._progressRepository ??= ProgressRepository(database: database);
+    return _instance;
+  }
   AchievementNotificationManager._internal();
   static final AchievementNotificationManager _instance = 
       AchievementNotificationManager._internal();
 
   final NotificationService _notificationService = NotificationService();
-  final AchievementRepository _achievementRepository = AchievementRepository();
-  final ProgressRepository _progressRepository = ProgressRepository();
+  LifeXPDatabase? _database;
+  AchievementRepository? _achievementRepository;
+  ProgressRepository? _progressRepository;
 
   Timer? _achievementCheckTimer;
   final Set<String> _recentlyNotified = {};
@@ -71,15 +78,15 @@ class AchievementNotificationManager {
     final celebrationMessage = _getCelebrationMessage(achievement);
     
     await _notificationService.showAchievementNotification(
-      achievementName: achievement.name,
+      achievementName: achievement.title,
       description: '${achievement.description}\n$celebrationMessage',
-      xpReward: achievement.xpReward,
+      xpReward: 0, // TODO: Add xpReward to Achievement model if needed
     );
 
     // Schedule follow-up encouragement
     await _scheduleAchievementFollowUp(achievement);
     
-    debugPrint('Sent achievement notification: ${achievement.name}');
+    debugPrint('Sent achievement notification: ${achievement.title}');
   }
 
   /// Get celebration message based on achievement type
@@ -89,9 +96,9 @@ class AchievementNotificationManager {
     switch (type) {
       case AchievementType.streak:
         return '🔥 Your dedication is paying off!';
-      case AchievementType.completion:
+      case AchievementType.total:
         return '✅ Task master in action!';
-      case AchievementType.xp:
+      case AchievementType.level:
         return '⭐ Experience points champion!';
       case AchievementType.category:
         return '🎯 Category specialist unlocked!';
@@ -111,7 +118,7 @@ class AchievementNotificationManager {
     final message = messages[DateTime.now().second % messages.length];
     
     // In a real implementation, this would schedule a delayed notification
-    debugPrint('Scheduled follow-up for ${achievement.name}: $message');
+    debugPrint('Scheduled follow-up for ${achievement.title}: $message');
   }
 
   /// Get follow-up messages for achievement types
@@ -123,13 +130,13 @@ class AchievementNotificationManager {
           'Every day you show up, you get stronger! 🌟',
           'Your streak is building incredible momentum! 🚀',
         ];
-      case AchievementType.completion:
+      case AchievementType.total:
         return [
           "You're becoming a completion machine! ⚡",
           'Each task completed is a step toward greatness! 👑',
           'Your productivity is truly inspiring! 📈',
         ];
-      case AchievementType.xp:
+      case AchievementType.level:
         return [
           'Your experience is growing exponentially! 📊',
           'Level up mindset activated! 🎮',

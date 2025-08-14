@@ -76,8 +76,9 @@ class OfflineManager {
   /// Check initial connectivity status
   Future<void> _checkInitialConnectivity() async {
     try {
-      final connectivityResults = await _connectivity.checkConnectivity();
-      _updateConnectivityStatus(connectivityResults);
+      final connectivityResult = await _connectivity.checkConnectivity();
+      // In newer versions of connectivity_plus, checkConnectivity returns List<ConnectivityResult>
+      _updateConnectivityStatus(connectivityResult);
     } catch (e) {
       debugPrint('OfflineManager: Failed to check initial connectivity: $e');
       _isOnline = false;

@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../data/models/world_tile.dart';
+import '../../../data/models/world.dart';
 import '../../../data/repositories/world_repository.dart';
 import 'world_event.dart';
 import 'world_state.dart';

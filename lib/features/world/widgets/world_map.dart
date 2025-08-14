@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../data/models/world_tile.dart';
+import '../../../data/models/world.dart';
 
 /// Interactive world map widget with zoom and pan functionality
 class WorldMap extends StatefulWidget {
@@ -215,7 +215,7 @@ class _WorldMapState extends State<WorldMap> {
   }
 
   WorldTile? _getTileAt(int x, int y) => widget.tiles
-      .where((tile) => tile.x == x && tile.y == y)
+      .where((tile) => tile.positionX == x && tile.positionY == y)
       .firstOrNull;
 
   Color _getTileColor(WorldTile tile) {
@@ -236,6 +236,8 @@ class _WorldMapState extends State<WorldMap> {
 
   Color _getTileTypeColor(TileType type) {
     switch (type) {
+      case TileType.grass:
+        return Colors.lightGreen.shade400;
       case TileType.forest:
         return Colors.green.shade600;
       case TileType.mountain:
@@ -246,6 +248,8 @@ class _WorldMapState extends State<WorldMap> {
         return Colors.orange.shade600;
       case TileType.city:
         return Colors.purple.shade600;
+      case TileType.building:
+        return Colors.brown.shade600;
       case TileType.special:
         return Colors.red.shade600;
     }
@@ -253,6 +257,8 @@ class _WorldMapState extends State<WorldMap> {
 
   IconData _getTileTypeIcon(TileType type) {
     switch (type) {
+      case TileType.grass:
+        return Icons.grass;
       case TileType.forest:
         return Icons.park;
       case TileType.mountain:
@@ -263,6 +269,8 @@ class _WorldMapState extends State<WorldMap> {
         return Icons.wb_sunny;
       case TileType.city:
         return Icons.location_city;
+      case TileType.building:
+        return Icons.business;
       case TileType.special:
         return Icons.star;
     }

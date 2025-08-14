@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../data/models/world_tile.dart';
+import '../../../data/models/world.dart';
 import '../../../shared/blocs/avatar/avatar_bloc_exports.dart';
 import '../../../shared/blocs/world/world_bloc_exports.dart';
 import '../../../shared/providers/user_context.dart';

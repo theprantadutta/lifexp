@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 
@@ -322,7 +323,7 @@ class NotificationService {
       channelDescription: 'Warnings when your streaks are about to break',
       importance: Importance.max,
       priority: Priority.max,
-      color: Color(0xFFFF6B35), // Orange warning color
+      color: const Color(0xFFFF6B35), // Orange warning color
       icon: '@drawable/ic_streak',
       actions: [
         AndroidNotificationAction(
@@ -352,7 +353,7 @@ class NotificationService {
       channelDescription: 'Achievement unlock notifications',
       importance: Importance.high,
       priority: Priority.high,
-      color: Color(0xFFFFD700), // Gold color
+      color: const Color(0xFFFFD700), // Gold color
       icon: '@drawable/ic_achievement',
     );
 
@@ -376,7 +377,7 @@ class NotificationService {
       channelDescription: 'Experience point gain notifications',
       importance: Importance.low,
       priority: Priority.low,
-      color: Color(0xFF4CAF50), // Green color
+      color: const Color(0xFF4CAF50), // Green color
       icon: '@drawable/ic_xp',
       timeoutAfter: 3000, // Auto-dismiss after 3 seconds
     );

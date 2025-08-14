@@ -301,7 +301,7 @@ class FirebaseSyncService {
       
       for (final entityType in entityTypes) {
         final entities = await _getAllLocalEntities(entityType);
-        backupData['entities'][entityType] = entities;
+        (backupData['entities'] as Map<String, dynamic>)[entityType] = entities;
       }
       
       // Save backup
@@ -327,21 +327,21 @@ class FirebaseSyncService {
     _updateSyncStatus(SyncStatus.syncing('Restoring from backup...'));
     
     try {
-      final Query backupsQuery = _firestore
+      final backupsCollection = _firestore
           .collection('users')
           .doc(currentUserId)
           .collection('backups');
       
       if (backupId != null) {
         // Restore specific backup
-        final doc = await backupsQuery.doc(backupId).get();
+        final doc = await backupsCollection.doc(backupId).get();
         if (!doc.exists) {
           throw Exception('Backup not found');
         }
         await _restoreFromBackupData(doc.data() as Map<String, dynamic>);
       } else {
         // Restore latest backup
-        final snapshot = await backupsQuery
+        final snapshot = await backupsCollection
             .orderBy('createdAt', descending: true)
             .limit(1)
             .get();
@@ -350,7 +350,7 @@ class FirebaseSyncService {
           throw Exception('No backups found');
         }
         
-        await _restoreFromBackupData(snapshot.docs.first.data());
+        await _restoreFromBackupData(snapshot.docs.first.data() as Map<String, dynamic>);
       }
       
       _updateSyncStatus(SyncStatus.completed(SyncResult()..dataRestored = true));

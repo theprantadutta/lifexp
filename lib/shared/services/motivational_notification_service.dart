@@ -7,20 +7,28 @@ import '../../data/models/task.dart';
 import '../../data/models/user.dart';
 import '../../data/repositories/progress_repository.dart';
 import '../../data/repositories/task_repository.dart';
-import '../../data/repositories/user_repository.dart';
+import '../../data/database/database.dart';
+import '../../data/repositories/auth_repository.dart';
 import 'notification_service.dart';
 
 /// Service for sending motivational and re-engagement notifications
 class MotivationalNotificationService {
-  factory MotivationalNotificationService() => _instance;
+  factory MotivationalNotificationService({required LifeXPDatabase database}) {
+    _instance._database ??= database;
+    _instance._taskRepository ??= TaskRepository(database: database);
+    _instance._progressRepository ??= ProgressRepository(database: database);
+    _instance._authRepository ??= AuthRepository();
+    return _instance;
+  }
   MotivationalNotificationService._internal();
   static final MotivationalNotificationService _instance = 
       MotivationalNotificationService._internal();
 
   final NotificationService _notificationService = NotificationService();
-  final TaskRepository _taskRepository = TaskRepository();
-  final ProgressRepository _progressRepository = ProgressRepository();
-  final UserRepository _userRepository = UserRepository();
+  LifeXPDatabase? _database;
+  TaskRepository? _taskRepository;
+  ProgressRepository? _progressRepository;
+  AuthRepository? _authRepository;
 
   Timer? _motivationalTimer;
   final Random _random = Random();
@@ -43,7 +51,7 @@ class MotivationalNotificationService {
   /// Check for motivational notification opportunities
   Future<void> _checkMotivationalOpportunities() async {
     try {
-      final user = await _userRepository.getCurrentUser();
+      final user = await _authRepository!.getCurrentUser();
       if (user == null) return;
 
       final lastActivity = await _getLastActivityDate();
@@ -64,7 +72,7 @@ class MotivationalNotificationService {
   /// Get last activity date
   Future<DateTime?> _getLastActivityDate() async {
     try {
-      final recentTasks = await _taskRepository.getRecentlyCompletedTasks(7);
+      final recentTasks = await _taskRepository!.getCompletedTasks('userId'); // TODO: Get actual userId
       if (recentTasks.isEmpty) return null;
 
       return recentTasks
@@ -125,7 +133,7 @@ class MotivationalNotificationService {
   /// Get last completed task
   Future<Task?> _getLastCompletedTask() async {
     try {
-      final recentTasks = await _taskRepository.getRecentlyCompletedTasks(1);
+      final recentTasks = await _taskRepository!.getCompletedTasks('userId'); // TODO: Get actual userId
       return recentTasks.isNotEmpty ? recentTasks.first : null;
     } catch (e) {
       debugPrint('Failed to get last completed task: $e');
@@ -181,9 +189,9 @@ class MotivationalNotificationService {
   /// Generate progress-based motivational message
   Future<Map<String, String>?> _generateProgressMessage(User user) async {
     try {
-      final weeklyProgress = await _progressRepository.getWeeklyProgress();
+      final weeklyProgress = await _progressRepository!.getWeeklyProgressSummary('userId'); // TODO: Get actual userId
       final tasksCompleted = weeklyProgress.fold<int>(
-        0, (sum, entry) => sum + entry.tasksCompleted,
+        0, (sum, entry) => sum + (entry['tasksCompleted'] as int? ?? 0),
       );
 
       if (tasksCompleted == 0) return null;
@@ -201,7 +209,7 @@ class MotivationalNotificationService {
   /// Generate streak-based motivational message
   Future<Map<String, String>?> _generateStreakMessage() async {
     try {
-      final streakTasks = await _taskRepository.getTasksWithStreaks();
+      final streakTasks = await _taskRepository!.getTasksWithStreaks('userId'); // TODO: Get actual userId
       if (streakTasks.isEmpty) return null;
 
       final longestStreak = streakTasks
