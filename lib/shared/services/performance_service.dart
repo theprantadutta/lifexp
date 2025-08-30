@@ -124,7 +124,7 @@ class PerformanceService {
     if (!kDebugMode) return;
     
     // This is a simplified memory check - in production you'd use more sophisticated tools
-    final info = developer.Service.getInfo();
+    // Memory info could be accessed via developer.Service.getInfo() when needed
     developer.log('PerformanceService: Memory check completed');
   }
 
@@ -302,10 +302,10 @@ mixin PerformanceMixin<T extends StatefulWidget> on State<T> {
   }
   
   /// Measure async operation performance
-  Future<T> measureAsync<T>(String operationName, Future<T> Function() operation) => _performanceService.measureAsync(operationName, operation);
+  Future<R> measureAsync<R>(String operationName, Future<R> Function() operation) => _performanceService.measureAsync(operationName, operation);
   
   /// Measure sync operation performance
-  T measureSync<T>(String operationName, T Function() operation) => _performanceService.measureSync(operationName, operation);
+  R measureSync<R>(String operationName, R Function() operation) => _performanceService.measureSync(operationName, operation);
   
   /// Report memory warning
   void reportMemoryWarning(String context) {

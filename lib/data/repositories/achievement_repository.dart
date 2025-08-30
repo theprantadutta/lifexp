@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer' as developer;
 
 import 'package:drift/drift.dart';
 
@@ -780,7 +781,7 @@ class AchievementRepository {
     try {
       await _offlineManager.queueSyncOperation(operation);
     } catch (e) {
-      print('AchievementRepository: Failed to queue sync operation: $e');
+      developer.log('Failed to queue sync operation: $e', name: 'AchievementRepository');
       // Continue execution - offline support is not critical for core functionality
     }
   }

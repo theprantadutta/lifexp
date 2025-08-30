@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -60,7 +61,7 @@ class FirebaseSyncService {
     try {
       await syncAllData();
     } catch (e) {
-      print('FirebaseSyncService: Background sync failed: $e');
+      developer.log('Background sync failed: $e', name: 'FirebaseSyncService');
     }
   }
 
@@ -350,7 +351,7 @@ class FirebaseSyncService {
           throw Exception('No backups found');
         }
         
-        await _restoreFromBackupData(snapshot.docs.first.data() as Map<String, dynamic>);
+        await _restoreFromBackupData(snapshot.docs.first.data());
       }
       
       _updateSyncStatus(SyncStatus.completed(SyncResult()..dataRestored = true));
@@ -422,7 +423,7 @@ class FirebaseSyncService {
           rethrow;
         }
         
-        print('FirebaseSyncService: Sync attempt $attempt failed, retrying in ${delay.inSeconds}s: $e');
+        developer.log('Sync attempt $attempt failed, retrying in ${delay.inSeconds}s: $e', name: 'FirebaseSyncService');
         await Future.delayed(delay);
         delay = Duration(seconds: min(delay.inSeconds * 2, 30)); // Max 30 seconds
       }
@@ -583,7 +584,7 @@ class BackupInfo {
   final String version;
   final Map<String, int> entityCounts;
 
-  int get totalEntities => entityCounts.values.fold(0, (sum, count) => sum + count);
+  int get totalEntities => entityCounts.values.fold(0, (total, value) => total + value);
 
   @override
   String toString() => 'BackupInfo(id: $id, createdAt: $createdAt, entities: $totalEntities)';

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -13,6 +14,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     : _authRepository = authRepository,
       super(const AuthInitial()) {
     on<AuthStatusRequested>(_onAuthStatusRequested);
+    on<AuthCheckRequested>(_onAuthStatusRequested); // Use same handler as AuthStatusRequested
     on<AuthSignUpRequested>(_onAuthSignUpRequested);
     on<AuthSignInRequested>(_onAuthSignInRequested);
     on<AuthSignOutRequested>(_onAuthSignOutRequested);
@@ -27,7 +29,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         add(AuthStatusChanged(user: user));
       },
       onError: (error) {
-        print('AuthBloc: Auth state stream error: $error');
+        developer.log('Auth state stream error: $error', name: 'AuthBloc');
         add(const AuthErrorOccurred(message: 'Authentication error occurred'));
       },
     );
@@ -38,17 +40,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   /// Handles checking authentication status
   Future<void> _onAuthStatusRequested(
-    AuthStatusRequested event,
+    AuthEvent event,
     Emitter<AuthState> emit,
   ) async {
     emit(const AuthLoading());
 
     try {
       // The auth state stream will handle emitting the correct state
-      print('AuthBloc: Checking authentication status');
+      developer.log('Checking authentication status', name: 'AuthBloc');
     } on Exception catch (e, stackTrace) {
-      print('AuthBloc: Error checking auth status: $e');
-      print('Stack trace: $stackTrace');
+      developer.log('Error checking auth status: $e', name: 'AuthBloc', error: e, stackTrace: stackTrace);
       emit(const AuthError(message: 'Failed to check authentication status'));
     }
   }
@@ -61,7 +62,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(const AuthSignUpLoading());
 
     try {
-      print('AuthBloc: Processing sign up request for ${event.email}');
+      developer.log('Processing sign up request for ${event.email}', name: 'AuthBloc');
 
       final user = await _authRepository.signUp(
         email: event.email,
@@ -69,11 +70,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         fullName: event.fullName,
       );
 
-      print('AuthBloc: Sign up successful for user ${user.id}');
+      developer.log('Sign up successful for user ${user.id}', name: 'AuthBloc');
       // The auth state stream will emit AuthAuthenticated
     } on Exception catch (e, stackTrace) {
-      print('AuthBloc: Sign up error: $e');
-      print('Stack trace: $stackTrace');
+      developer.log('Sign up error: $e', name: 'AuthBloc', error: e, stackTrace: stackTrace);
 
       emit(
         AuthError(
@@ -92,18 +92,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(const AuthSignInLoading());
 
     try {
-      print('AuthBloc: Processing sign in request for ${event.email}');
+      developer.log('Processing sign in request for ${event.email}', name: 'AuthBloc');
 
       final user = await _authRepository.signIn(
         email: event.email,
         password: event.password,
       );
 
-      print('AuthBloc: Sign in successful for user ${user.id}');
+      developer.log('Sign in successful for user ${user.id}', name: 'AuthBloc');
       // The auth state stream will emit AuthAuthenticated
     } on Exception catch (e, stackTrace) {
-      print('AuthBloc: Sign in error: $e');
-      print('Stack trace: $stackTrace');
+      developer.log('Sign in error: $e', name: 'AuthBloc', error: e, stackTrace: stackTrace);
 
       emit(
         AuthError(
@@ -120,12 +119,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     try {
-      print('AuthBloc: Processing sign out request');
+      developer.log('Processing sign out request', name: 'AuthBloc');
       await _authRepository.signOut();
       // The auth state stream will emit AuthUnauthenticated
     } on Exception catch (e, stackTrace) {
-      print('AuthBloc: Sign out error: $e');
-      print('Stack trace: $stackTrace');
+      developer.log('Sign out error: $e', name: 'AuthBloc', error: e, stackTrace: stackTrace);
 
       emit(AuthError(message: e.toString().replaceFirst('Exception: ', '')));
     }
@@ -137,15 +135,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     try {
-      print('AuthBloc: Processing password reset request for ${event.email}');
+      developer.log('Processing password reset request for ${event.email}', name: 'AuthBloc');
 
       await _authRepository.sendPasswordResetEmail(event.email);
 
       emit(AuthPasswordResetSent(email: event.email));
-      print('AuthBloc: Password reset email sent successfully');
+      developer.log('Password reset email sent successfully', name: 'AuthBloc');
     } on Exception catch (e, stackTrace) {
-      print('AuthBloc: Password reset error: $e');
-      print('Stack trace: $stackTrace');
+      developer.log('Password reset error: $e', name: 'AuthBloc', error: e, stackTrace: stackTrace);
 
       emit(
         AuthError(
@@ -164,7 +161,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(const AuthProfileUpdateLoading());
 
     try {
-      print('AuthBloc: Processing profile update request');
+      developer.log('Processing profile update request', name: 'AuthBloc');
 
       final user = await _authRepository.updateProfile(
         fullName: event.fullName,
@@ -172,10 +169,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       );
 
       emit(AuthProfileUpdated(user: user));
-      print('AuthBloc: Profile updated successfully');
+      developer.log('Profile updated successfully', name: 'AuthBloc');
     } on Exception catch (e, stackTrace) {
-      print('AuthBloc: Profile update error: $e');
-      print('Stack trace: $stackTrace');
+      developer.log('Profile update error: $e', name: 'AuthBloc', error: e, stackTrace: stackTrace);
 
       emit(AuthError(message: e.toString().replaceFirst('Exception: ', '')));
     }

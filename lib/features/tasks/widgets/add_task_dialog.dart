@@ -117,7 +117,7 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
 
               // Task type dropdown
               DropdownButtonFormField<TaskType>(
-                value: _selectedType,
+                initialValue: _selectedType,
                 decoration: const InputDecoration(
                   labelText: 'Task Type',
                   border: OutlineInputBorder(),
@@ -144,7 +144,7 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
 
               // Category dropdown
               DropdownButtonFormField<TaskCategory>(
-                value: _selectedCategory,
+                initialValue: _selectedCategory,
                 decoration: const InputDecoration(
                   labelText: 'Category',
                   border: OutlineInputBorder(),

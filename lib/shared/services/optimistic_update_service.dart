@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 
 /// Service for managing optimistic UI updates during offline operations
@@ -28,14 +29,14 @@ class OptimisticUpdateService {
     _pendingUpdates[update.id] = update;
     _notifyListeners();
     
-    print('OptimisticUpdateService: Added update ${update.id} (${update.operation})');
+    developer.log('Added update ${update.id} (${update.operation})', name: 'OptimisticUpdateService');
   }
 
   /// Confirm an optimistic update (operation succeeded)
   void confirmUpdate(String updateId) {
     final update = _pendingUpdates.remove(updateId);
     if (update != null) {
-      print('OptimisticUpdateService: Confirmed update $updateId');
+      developer.log('Confirmed update $updateId', name: 'OptimisticUpdateService');
       _notifyListeners();
     }
   }
@@ -44,7 +45,7 @@ class OptimisticUpdateService {
   void revertUpdate(String updateId, {String? reason}) {
     final update = _pendingUpdates.remove(updateId);
     if (update != null) {
-      print('OptimisticUpdateService: Reverted update $updateId${reason != null ? ' - $reason' : ''}');
+      developer.log('Reverted update $updateId${reason != null ? ' - $reason' : ''}', name: 'OptimisticUpdateService');
       _notifyListeners();
       
       // Notify about the revert
@@ -78,7 +79,7 @@ class OptimisticUpdateService {
   void clearAllUpdates() {
     _pendingUpdates.clear();
     _notifyListeners();
-    print('OptimisticUpdateService: Cleared all updates');
+    developer.log('Cleared all updates', name: 'OptimisticUpdateService');
   }
 
   /// Clear updates for specific entity
@@ -96,7 +97,7 @@ class OptimisticUpdateService {
     
     if (toRemove.isNotEmpty) {
       _notifyListeners();
-      print('OptimisticUpdateService: Cleared ${toRemove.length} updates for $entityType:$entityId');
+      developer.log('Cleared ${toRemove.length} updates for $entityType:$entityId', name: 'OptimisticUpdateService');
     }
   }
 
@@ -111,7 +112,7 @@ class OptimisticUpdateService {
     
     if (removed > 0) {
       _notifyListeners();
-      print('OptimisticUpdateService: Batch confirmed $removed updates');
+      developer.log('Batch confirmed $removed updates', name: 'OptimisticUpdateService');
     }
   }
 
@@ -130,7 +131,7 @@ class OptimisticUpdateService {
     
     if (reverted > 0) {
       _notifyListeners();
-      print('OptimisticUpdateService: Batch reverted $reverted updates${reason != null ? ' - $reason' : ''}');
+      developer.log('Batch reverted $reverted updates${reason != null ? ' - $reason' : ''}', name: 'OptimisticUpdateService');
       
       // Notify about reverts
       for (final update in revertedUpdates) {
@@ -185,7 +186,7 @@ class OptimisticUpdateService {
         _pendingUpdates.remove(key);
       }
       _notifyListeners();
-      print('OptimisticUpdateService: Cleaned up ${toRemove.length} old updates');
+      developer.log('Cleaned up ${toRemove.length} old updates', name: 'OptimisticUpdateService');
     }
   }
 

@@ -222,9 +222,6 @@ class _RiveProgressBarState extends State<RiveProgressBar>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
     return SizedBox(
       height: widget.height,
       child: _animationSetup != null
@@ -319,9 +316,6 @@ class _AttributeEffectAnimationState extends State<AttributeEffectAnimation>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
     return SizedBox(
       width: widget.size,
       height: widget.size,

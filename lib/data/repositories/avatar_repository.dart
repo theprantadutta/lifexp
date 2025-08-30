@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer' as developer;
 
 import 'package:drift/drift.dart';
 
@@ -442,7 +443,7 @@ class AvatarRepository {
     try {
       await _offlineManager.queueSyncOperation(operation);
     } catch (e) {
-      print('AvatarRepository: Failed to queue sync operation: $e');
+      developer.log('Failed to queue sync operation: $e', name: 'AvatarRepository');
       // Continue execution - offline support is not critical for core functionality
     }
   }

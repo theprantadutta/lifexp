@@ -279,8 +279,6 @@ class AccessibleAchievementGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accessibilityService = AccessibilityService();
-    
     if (achievements.isEmpty) {
       return Semantics(
         label: emptyMessage ?? 'No achievements available',

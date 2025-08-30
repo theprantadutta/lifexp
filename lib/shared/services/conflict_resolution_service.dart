@@ -78,8 +78,6 @@ class ConflictResolutionService {
     Map<String, dynamic> localData,
     Map<String, dynamic> remoteData,
   ) {
-    final merged = Map<String, dynamic>.from(remoteData);
-    
     // Merge based on entity type
     final entityType = localData['entityType'] ?? remoteData['entityType'];
     
@@ -251,7 +249,7 @@ class ConflictResolutionService {
   }
 
   /// Get maximum of two numeric values
-  num _max(a, b) {
+  num _max(dynamic a, dynamic b) {
     final numA = (a is num) ? a : 0;
     final numB = (b is num) ? b : 0;
     return numA > numB ? numA : numB;

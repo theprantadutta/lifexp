@@ -242,7 +242,6 @@ class _AvatarCustomizationPanelState extends State<AvatarCustomizationPanel> {
   }
 
   void _showUnlockDialog(BuildContext context, Map<String, dynamic> option) {
-    final theme = Theme.of(context);
     final requiredLevel = option['unlockLevel'] as int;
 
     showDialog(

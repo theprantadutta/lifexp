@@ -127,9 +127,6 @@ class StreakNotificationManager {
       return;
     }
 
-    final urgencyLevel = _getUrgencyLevel(task, now);
-    final warningMessage = _getWarningMessage(task, urgencyLevel);
-
     await _notificationService.scheduleStreakWarning(
       task: task,
       warningTime: now.add(const Duration(minutes: 1)), // Send immediately
@@ -137,44 +134,6 @@ class StreakNotificationManager {
 
     _lastWarningTimes[task.id] = now;
     debugPrint('Sent streak warning for: ${task.title}');
-  }
-
-  /// Get urgency level for streak warning
-  StreakUrgency _getUrgencyLevel(Task task, DateTime now) {
-    if (task.lastCompletedDate == null) return StreakUrgency.low;
-
-    final hoursSinceCompletion = now.difference(task.lastCompletedDate!).inHours;
-    final streakType = _getStreakType(task);
-    final breakThreshold = _getBreakThreshold(streakType);
-
-    final hoursUntilBreak = breakThreshold - hoursSinceCompletion;
-
-    if (hoursUntilBreak <= 2) {
-      return StreakUrgency.critical;
-    } else if (hoursUntilBreak <= 6) {
-      return StreakUrgency.high;
-    } else {
-      return StreakUrgency.medium;
-    }
-  }
-
-  /// Get warning message based on urgency
-  String _getWarningMessage(Task task, StreakUrgency urgency) {
-    final streakCount = task.streakCount;
-    
-    switch (urgency) {
-      case StreakUrgency.critical:
-        return 'URGENT: Your $streakCount-day streak for "${task.title}" '
-               'breaks in less than 2 hours! 🚨';
-      case StreakUrgency.high:
-        return 'Warning: Your $streakCount-day streak for "${task.title}" '
-               'is at risk! Complete it soon! ⚠️';
-      case StreakUrgency.medium:
-        return 'Reminder: Keep your $streakCount-day streak alive! '
-               'Don\'t forget "${task.title}" 🔥';
-      case StreakUrgency.low:
-        return 'Gentle reminder about "${task.title}" to maintain your streak 😊';
-    }
   }
 
   /// Send streak broken notification

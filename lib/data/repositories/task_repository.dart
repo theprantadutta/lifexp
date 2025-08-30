@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 
 import 'package:drift/drift.dart';
 
@@ -31,31 +32,29 @@ class TaskRepository {
   /// Gets all tasks for a user with caching
   Future<List<Task>> getTasksByUserId(String userId) async {
     try {
-      print('TaskRepository: Loading tasks for user $userId');
+      developer.log('Loading tasks for user $userId', name: 'TaskRepository');
 
       // Check cache first
       final cachedTasks = _getCachedTasks(userId);
       if (cachedTasks != null) {
-        print('TaskRepository: Returning ${cachedTasks.length} cached tasks');
+        developer.log('Returning ${cachedTasks.length} cached tasks', name: 'TaskRepository');
         return cachedTasks;
       }
 
       // Fetch from database
-      print('TaskRepository: Fetching tasks from database');
+      developer.log('Fetching tasks from database', name: 'TaskRepository');
       final taskDataList = await _database.taskDao.getTasksByUserId(userId);
-      print('TaskRepository: Found ${taskDataList.length} tasks in database');
+      developer.log('Found ${taskDataList.length} tasks in database', name: 'TaskRepository');
 
       final tasks = taskDataList.map(_convertFromData).toList();
 
       _cacheTasks(userId, tasks);
-      print(
-        'TaskRepository: Successfully loaded and cached ${tasks.length} tasks',
+      developer.log(
+        'Successfully loaded and cached ${tasks.length} tasks', name: 'TaskRepository',
       );
       return tasks;
     } catch (e, stackTrace) {
-      print('TaskRepository: Error loading tasks for user $userId');
-      print('Error: $e');
-      print('Stack trace: $stackTrace');
+      developer.log('Error loading tasks for user $userId', name: 'TaskRepository', error: e, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -119,7 +118,7 @@ class TaskRepository {
 
       return task;
     } catch (e) {
-      print('TaskRepository: Error creating task: $e');
+      developer.log('Error creating task: $e', name: 'TaskRepository');
       rethrow;
     }
   }
@@ -155,7 +154,7 @@ class TaskRepository {
 
       return null;
     } catch (e) {
-      print('TaskRepository: Error updating task: $e');
+      developer.log('Error updating task: $e', name: 'TaskRepository');
       return null;
     }
   }
@@ -188,7 +187,7 @@ class TaskRepository {
 
       return completedTask;
     } catch (e) {
-      print('TaskRepository: Error completing task: $e');
+      developer.log('Error completing task: $e', name: 'TaskRepository');
       return null;
     }
   }
@@ -680,7 +679,7 @@ class TaskRepository {
     try {
       await _offlineManager.queueSyncOperation(operation);
     } catch (e) {
-      print('TaskRepository: Failed to queue sync operation: $e');
+      developer.log('Failed to queue sync operation: $e', name: 'TaskRepository');
       // Continue execution - offline support is not critical for core functionality
     }
   }

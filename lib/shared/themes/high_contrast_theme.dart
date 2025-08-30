@@ -8,8 +8,6 @@ class HighContrastTheme {
     const onPrimaryColor = Color(0xFFFFFFFF); // Pure white
     const secondaryColor = Color(0xFF0000FF); // Pure blue
     const errorColor = Color(0xFFFF0000); // Pure red
-    const successColor = Color(0xFF008000); // Pure green
-    const warningColor = Color(0xFFFF8000); // Pure orange
     
     const colorScheme = ColorScheme.light(
       primary: primaryColor,
@@ -238,8 +236,6 @@ class HighContrastTheme {
     const onPrimaryColor = Color(0xFF000000); // Pure black
     const secondaryColor = Color(0xFF00FFFF); // Pure cyan
     const errorColor = Color(0xFFFF4444); // Bright red
-    const successColor = Color(0xFF44FF44); // Bright green
-    const warningColor = Color(0xFFFFAA00); // Bright orange
     const backgroundColor = Color(0xFF000000); // Pure black
     
     const colorScheme = ColorScheme.dark(

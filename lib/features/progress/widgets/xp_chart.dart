@@ -70,10 +70,10 @@ class XPChart extends StatelessWidget {
                   ),
                   titlesData: FlTitlesData(
                     rightTitles: const AxisTitles(
-                      
+                      sideTitles: SideTitles(showTitles: false),
                     ),
                     topTitles: const AxisTitles(
-                      
+                      sideTitles: SideTitles(showTitles: false),
                     ),
                     bottomTitles: AxisTitles(
                       sideTitles: SideTitles(
@@ -155,7 +155,7 @@ class XPChart extends StatelessWidget {
                   ],
                   lineTouchData: LineTouchData(
                     touchTooltipData: LineTouchTooltipData(
-                      tooltipBgColor: Theme.of(context)
+                      getTooltipColor: (touchedSpot) => Theme.of(context)
                           .colorScheme
                           .surfaceContainerHighest,
                       getTooltipItems: (touchedSpots) => touchedSpots
@@ -287,7 +287,8 @@ class XPChart extends StatelessWidget {
     }
 
     return SideTitleWidget(
-      axisSide: meta.axisSide,
+      meta: meta,
+      space: 8,
       child: Text(
         text,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -301,7 +302,8 @@ class XPChart extends StatelessWidget {
   }
 
   Widget _buildLeftTitle(BuildContext context, double value, TitleMeta meta) => SideTitleWidget(
-        axisSide: meta.axisSide,
+        meta: meta,
+        space: 8,
         child: Text(
           value.toInt().toString(),
           style: Theme.of(context).textTheme.bodySmall?.copyWith(

@@ -247,20 +247,16 @@ class DensityAwareSpacing extends StatelessWidget {
   });
 
   const DensityAwareSpacing.vertical(
-    double spacing, {
+    this.spacing, {
     super.key,
-    VisualDensity? customDensity,
-  }) : spacing = spacing,
-       direction = Axis.vertical,
-       customDensity = customDensity;
+    this.customDensity,
+  }) : direction = Axis.vertical;
 
   const DensityAwareSpacing.horizontal(
-    double spacing, {
+    this.spacing, {
     super.key,
-    VisualDensity? customDensity,
-  }) : spacing = spacing,
-       direction = Axis.horizontal,
-       customDensity = customDensity;
+    this.customDensity,
+  }) : direction = Axis.horizontal;
   final double spacing;
   final Axis direction;
   final VisualDensity? customDensity;
@@ -290,20 +286,16 @@ class DensityAwarePadding extends StatelessWidget {
 
   DensityAwarePadding.all(
     double padding, {
-    required Widget child, super.key,
-    VisualDensity? customDensity,
-  }) : padding = EdgeInsets.all(padding),
-       child = child,
-       customDensity = customDensity;
+    required this.child, super.key,
+    this.customDensity,
+  }) : padding = EdgeInsets.all(padding);
 
   DensityAwarePadding.symmetric({
-    required Widget child, super.key,
+    required this.child, super.key,
     double vertical = 0,
     double horizontal = 0,
-    VisualDensity? customDensity,
-  }) : padding = EdgeInsets.symmetric(vertical: vertical, horizontal: horizontal),
-       child = child,
-       customDensity = customDensity;
+    this.customDensity,
+  }) : padding = EdgeInsets.symmetric(vertical: vertical, horizontal: horizontal);
   final EdgeInsets padding;
   final Widget child;
   final VisualDensity? customDensity;

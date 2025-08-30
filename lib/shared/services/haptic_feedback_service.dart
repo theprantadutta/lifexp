@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -26,7 +27,7 @@ class HapticFeedbackService {
       await HapticFeedback.lightImpact();
     } catch (e) {
       if (kDebugMode) {
-        print('HapticFeedbackService: Light impact failed: $e');
+        developer.log('Light impact failed: $e', name: 'HapticFeedbackService');
       }
     }
   }
@@ -39,7 +40,7 @@ class HapticFeedbackService {
       await HapticFeedback.mediumImpact();
     } catch (e) {
       if (kDebugMode) {
-        print('HapticFeedbackService: Medium impact failed: $e');
+        developer.log('Medium impact failed: $e', name: 'HapticFeedbackService');
       }
     }
   }
@@ -52,7 +53,7 @@ class HapticFeedbackService {
       await HapticFeedback.heavyImpact();
     } catch (e) {
       if (kDebugMode) {
-        print('HapticFeedbackService: Heavy impact failed: $e');
+        developer.log('Heavy impact failed: $e', name: 'HapticFeedbackService');
       }
     }
   }
@@ -65,7 +66,7 @@ class HapticFeedbackService {
       await HapticFeedback.selectionClick();
     } catch (e) {
       if (kDebugMode) {
-        print('HapticFeedbackService: Selection click failed: $e');
+        developer.log('Selection click failed: $e', name: 'HapticFeedbackService');
       }
     }
   }
@@ -78,7 +79,7 @@ class HapticFeedbackService {
       await HapticFeedback.vibrate();
     } catch (e) {
       if (kDebugMode) {
-        print('HapticFeedbackService: Vibrate failed: $e');
+        developer.log('Vibrate failed: $e', name: 'HapticFeedbackService');
       }
     }
   }

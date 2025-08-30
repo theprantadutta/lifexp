@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer' as developer;
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -86,7 +87,7 @@ class OfflineDataManager {
       _syncQueueController.add(_syncQueue);
     } catch (e) {
       // Handle save error gracefully
-      print('Failed to save sync queue: $e');
+      developer.log('Failed to save sync queue: $e', name: 'OfflineDataManager');
     }
   }
 
@@ -150,7 +151,7 @@ class OfflineDataManager {
         // Remove if max retries exceeded
         if (updatedOperation.retryCount >= 3) {
           await _removeSyncOperation(operation.id);
-          print('Max retries exceeded for operation ${operation.id}: $e');
+          developer.log('Max retries exceeded for operation ${operation.id}: $e', name: 'OfflineDataManager');
         } else {
           // Update operation with new retry count
           final index = _syncQueue.indexWhere((op) => op.id == operation.id);
@@ -186,7 +187,7 @@ class OfflineDataManager {
   /// Handle create operation
   Future<void> _handleCreateOperation(SyncOperation operation) async {
     // Implementation would depend on the entity type and cloud service
-    print('Processing create operation for ${operation.entityType}:${operation.entityId}');
+    developer.log('Processing create operation for ${operation.entityType}:${operation.entityId}', name: 'OfflineDataManager');
     
     // Simulate network delay
     await Future.delayed(const Duration(milliseconds: 500));
@@ -197,13 +198,13 @@ class OfflineDataManager {
 
   /// Handle update operation
   Future<void> _handleUpdateOperation(SyncOperation operation) async {
-    print('Processing update operation for ${operation.entityType}:${operation.entityId}');
+    developer.log('Processing update operation for ${operation.entityType}:${operation.entityId}', name: 'OfflineDataManager');
     await Future.delayed(const Duration(milliseconds: 300));
   }
 
   /// Handle delete operation
   Future<void> _handleDeleteOperation(SyncOperation operation) async {
-    print('Processing delete operation for ${operation.entityType}:${operation.entityId}');
+    developer.log('Processing delete operation for ${operation.entityType}:${operation.entityId}', name: 'OfflineDataManager');
     await Future.delayed(const Duration(milliseconds: 200));
   }
 

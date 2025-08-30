@@ -135,8 +135,6 @@ class AccessibleAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accessibilityService = AccessibilityService();
-    
     return AppBar(
       title: Semantics(
         header: true,

@@ -688,7 +688,6 @@ class WorldRepository {
 
   /// Converts WorldTile model to database companion
   WorldTilesCompanion _convertToCompanion(WorldTile tile, String userId) {
-    final now = DateTime.now();
     return WorldTilesCompanion.insert(
       id: tile.id,
       userId: userId,

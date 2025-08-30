@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
@@ -42,7 +43,7 @@ class OfflineStateDetector {
     _connectivitySubscription = _connectivity.onConnectivityChanged.listen(
       _onConnectivityChanged,
       onError: (error) {
-        print('OfflineStateDetector: Connectivity stream error: $error');
+        developer.log('Connectivity stream error: $error', name: 'OfflineStateDetector');
       },
     );
     
@@ -52,7 +53,7 @@ class OfflineStateDetector {
 
   /// Handle connectivity changes
   Future<void> _onConnectivityChanged(List<ConnectivityResult> results) async {
-    print('OfflineStateDetector: Connectivity changed to $results');
+    developer.log('Connectivity changed to $results', name: 'OfflineStateDetector');
     
     if (results.every((result) => result == ConnectivityResult.none)) {
       _updateState(ConnectionState.offline);
@@ -73,7 +74,7 @@ class OfflineStateDetector {
         await _verifyInternetAccess();
       }
     } catch (e) {
-      print('OfflineStateDetector: Error checking connectivity: $e');
+      developer.log('Error checking connectivity: $e', name: 'OfflineStateDetector');
       _updateState(ConnectionState.offline);
     }
   }
@@ -97,7 +98,7 @@ class OfflineStateDetector {
       
       client.close();
     } catch (e) {
-      print('OfflineStateDetector: Internet verification failed: $e');
+      developer.log('Internet verification failed: $e', name: 'OfflineStateDetector');
       _updateState(ConnectionState.offline);
     }
   }
@@ -108,7 +109,7 @@ class OfflineStateDetector {
       final previousState = _currentState;
       _currentState = newState;
       
-      print('OfflineStateDetector: State changed from $previousState to $newState');
+      developer.log('State changed from $previousState to $newState', name: 'OfflineStateDetector');
       
       if (!_stateController.isClosed) {
         _stateController.add(newState);

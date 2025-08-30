@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -20,9 +21,9 @@ class FirebaseConfig {
       _configureAuth();
       
       _initialized = true;
-      print('FirebaseConfig: Firebase initialized successfully');
+      developer.log('Firebase initialized successfully', name: 'FirebaseConfig');
     } catch (e) {
-      print('FirebaseConfig: Failed to initialize Firebase: $e');
+      developer.log('Failed to initialize Firebase: $e', name: 'FirebaseConfig');
       rethrow;
     }
   }
@@ -68,10 +69,10 @@ class FirebaseAuthHelper {
   static Future<User?> signInAnonymously() async {
     try {
       final credential = await _auth.signInAnonymously();
-      print('FirebaseAuthHelper: Signed in anonymously: ${credential.user?.uid}');
+      developer.log('Signed in anonymously: ${credential.user?.uid}', name: 'FirebaseAuthHelper');
       return credential.user;
     } catch (e) {
-      print('FirebaseAuthHelper: Anonymous sign in failed: $e');
+      developer.log('Anonymous sign in failed: $e', name: 'FirebaseAuthHelper');
       rethrow;
     }
   }
@@ -83,10 +84,10 @@ class FirebaseAuthHelper {
         email: email,
         password: password,
       );
-      print('FirebaseAuthHelper: Signed in with email: ${credential.user?.email}');
+      developer.log('Signed in with email: ${credential.user?.email}', name: 'FirebaseAuthHelper');
       return credential.user;
     } catch (e) {
-      print('FirebaseAuthHelper: Email sign in failed: $e');
+      developer.log('Email sign in failed: $e', name: 'FirebaseAuthHelper');
       rethrow;
     }
   }
@@ -98,10 +99,10 @@ class FirebaseAuthHelper {
         email: email,
         password: password,
       );
-      print('FirebaseAuthHelper: Created account: ${credential.user?.email}');
+      developer.log('Created account: ${credential.user?.email}', name: 'FirebaseAuthHelper');
       return credential.user;
     } catch (e) {
-      print('FirebaseAuthHelper: Account creation failed: $e');
+      developer.log('Account creation failed: $e', name: 'FirebaseAuthHelper');
       rethrow;
     }
   }
@@ -110,9 +111,9 @@ class FirebaseAuthHelper {
   static Future<void> signOut() async {
     try {
       await _auth.signOut();
-      print('FirebaseAuthHelper: Signed out successfully');
+      developer.log('Signed out successfully', name: 'FirebaseAuthHelper');
     } catch (e) {
-      print('FirebaseAuthHelper: Sign out failed: $e');
+      developer.log('Sign out failed: $e', name: 'FirebaseAuthHelper');
       rethrow;
     }
   }
@@ -126,9 +127,9 @@ class FirebaseAuthHelper {
     
     try {
       await user.delete();
-      print('FirebaseAuthHelper: Account deleted successfully');
+      developer.log('Account deleted successfully', name: 'FirebaseAuthHelper');
     } catch (e) {
-      print('FirebaseAuthHelper: Account deletion failed: $e');
+      developer.log('Account deletion failed: $e', name: 'FirebaseAuthHelper');
       rethrow;
     }
   }

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer' as developer;
 
 import '../../shared/services/conflict_resolution_service.dart';
 import '../../shared/services/offline_data_manager.dart';
@@ -112,7 +113,7 @@ abstract class BaseOfflineRepository<T> {
         final result = await createEntity(entity, userId);
         results.add(result);
       } catch (e) {
-        print('BaseOfflineRepository: Failed to create entity ${getEntityId(entity)}: $e');
+        developer.log('Failed to create entity ${getEntityId(entity)}: $e', name: 'BaseOfflineRepository');
         // Continue with other entities
       }
     }
@@ -129,7 +130,7 @@ abstract class BaseOfflineRepository<T> {
         final result = await updateEntity(entity, userId);
         results.add(result);
       } catch (e) {
-        print('BaseOfflineRepository: Failed to update entity ${getEntityId(entity)}: $e');
+        developer.log('Failed to update entity ${getEntityId(entity)}: $e', name: 'BaseOfflineRepository');
         // Continue with other entities
       }
     }
@@ -163,10 +164,10 @@ abstract class BaseOfflineRepository<T> {
           await saveToLocal(resolvedEntity, userId);
           syncResult.resolved++;
           
-          print('BaseOfflineRepository: Resolved conflict for ${conflict.entityId}: ${resolution.reason}');
+          developer.log('Resolved conflict for ${conflict.entityId}: ${resolution.reason}', name: 'BaseOfflineRepository');
         } catch (e) {
           syncResult.errors.add('Failed to resolve conflict for ${conflict.entityId}: $e');
-          print('BaseOfflineRepository: Failed to resolve conflict for ${conflict.entityId}: $e');
+          developer.log('Failed to resolve conflict for ${conflict.entityId}: $e', name: 'BaseOfflineRepository');
         }
       }
       
@@ -302,7 +303,7 @@ abstract class BaseOfflineRepository<T> {
     try {
       await _offlineManager.queueSyncOperation(operation);
     } catch (e) {
-      print('BaseOfflineRepository: Failed to queue sync operation: $e');
+      developer.log('Failed to queue sync operation: $e', name: 'BaseOfflineRepository');
       // Continue execution - offline support is not critical for core functionality
     }
   }

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 class TextScalingService {
   static const double _minScaleFactor = 0.8;
   static const double _maxScaleFactor = 3;
-  static const double _defaultScaleFactor = 1;
   
   /// Get the current system text scale factor
   static double getSystemTextScaleFactor(BuildContext context) => MediaQuery.of(context).textScaler.scale(1);
@@ -114,8 +113,6 @@ class TextScalingService {
   
   /// Create responsive theme data with proper text scaling
   static ThemeData createResponsiveTheme(BuildContext context, ThemeData baseTheme) {
-    final scaleFactor = getClampedTextScaleFactor(context);
-    
     // Create responsive text theme
     final responsiveTextTheme = _createResponsiveTextTheme(context, baseTheme.textTheme);
     
@@ -326,14 +323,12 @@ class ResponsiveSizedBox extends StatelessWidget {
     this.child,
   });
 
-  const ResponsiveSizedBox.height(double height, {super.key})
+  const ResponsiveSizedBox.height(this.height, {super.key})
       : width = null,
-        height = height,
         child = null;
 
-  const ResponsiveSizedBox.width(double width, {super.key})
-      : width = width,
-        height = null,
+  const ResponsiveSizedBox.width(this.width, {super.key})
+      : height = null,
         child = null;
   final double? width;
   final double? height;

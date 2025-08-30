@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
@@ -44,7 +45,7 @@ class AuthRepository {
     required String fullName,
   }) async {
     try {
-      print('AuthRepository: Starting sign up for $email');
+      developer.log('Starting sign up for $email', name: 'AuthRepository');
 
       // Create user with Firebase Auth
       final credential = await _firebaseAuth.createUserWithEmailAndPassword(
@@ -57,8 +58,9 @@ class AuthRepository {
         throw Exception('Failed to create user account');
       }
 
-      print(
-        'AuthRepository: Firebase user created with ID: ${firebaseUser.uid}',
+      developer.log(
+        'Firebase user created with ID: ${firebaseUser.uid}',
+        name: 'AuthRepository',
       );
 
       // Update display name
@@ -82,18 +84,17 @@ class AuthRepository {
           .collection('users')
           .doc(firebaseUser.uid)
           .set(user.toFirestore());
-      print('AuthRepository: User document created in Firestore');
+      developer.log('User document created in Firestore', name: 'AuthRepository');
 
       // Also create user in local database for foreign key constraints
       await _createLocalUser(user);
 
       return user;
     } on firebase_auth.FirebaseAuthException catch (e) {
-      print('AuthRepository: Firebase Auth error: ${e.code} - ${e.message}');
+      developer.log('Firebase Auth error: ${e.code} - ${e.message}', name: 'AuthRepository', error: e);
       throw _handleAuthException(e);
     } on Exception catch (e, stackTrace) {
-      print('AuthRepository: Unexpected error during sign up: $e');
-      print('Stack trace: $stackTrace');
+      developer.log('Unexpected error during sign up', name: 'AuthRepository', error: e, stackTrace: stackTrace);
       throw Exception('Failed to create account. Please try again.');
     }
   }
@@ -101,7 +102,7 @@ class AuthRepository {
   /// Sign in with email and password
   Future<User> signIn({required String email, required String password}) async {
     try {
-      print('AuthRepository: Starting sign in for $email');
+      developer.log('Starting sign in for $email', name: 'AuthRepository');
 
       final credential = await _firebaseAuth.signInWithEmailAndPassword(
         email: email,
@@ -113,7 +114,7 @@ class AuthRepository {
         throw Exception('Failed to sign in');
       }
 
-      print('AuthRepository: Firebase sign in successful');
+      developer.log('Firebase sign in successful', name: 'AuthRepository');
 
       // Get user data from Firestore
       final user = await _getUserFromFirestore(firebaseUser.uid);
@@ -126,11 +127,10 @@ class AuthRepository {
 
       return user;
     } on firebase_auth.FirebaseAuthException catch (e) {
-      print('AuthRepository: Firebase Auth error: ${e.code} - ${e.message}');
+      developer.log('Firebase Auth error: ${e.code} - ${e.message}', name: 'AuthRepository', error: e);
       throw _handleAuthException(e);
     } on Exception catch (e, stackTrace) {
-      print('AuthRepository: Unexpected error during sign in: $e');
-      print('Stack trace: $stackTrace');
+      developer.log('Unexpected error during sign in', name: 'AuthRepository', error: e, stackTrace: stackTrace);
       throw Exception('Failed to sign in. Please try again.');
     }
   }
@@ -138,11 +138,10 @@ class AuthRepository {
   /// Sign out
   Future<void> signOut() async {
     try {
-      print('AuthRepository: Signing out user');
+      developer.log('Signing out user', name: 'AuthRepository');
       await _firebaseAuth.signOut();
     } on Exception catch (e, stackTrace) {
-      print('AuthRepository: Error during sign out: $e');
-      print('Stack trace: $stackTrace');
+      developer.log('Error during sign out', name: 'AuthRepository', error: e, stackTrace: stackTrace);
       throw Exception('Failed to sign out. Please try again.');
     }
   }
@@ -150,14 +149,13 @@ class AuthRepository {
   /// Send password reset email
   Future<void> sendPasswordResetEmail(String email) async {
     try {
-      print('AuthRepository: Sending password reset email to $email');
+      developer.log('Sending password reset email to $email', name: 'AuthRepository');
       await _firebaseAuth.sendPasswordResetEmail(email: email);
     } on firebase_auth.FirebaseAuthException catch (e) {
-      print('AuthRepository: Password reset error: ${e.code} - ${e.message}');
+      developer.log('Password reset error: ${e.code} - ${e.message}', name: 'AuthRepository', error: e);
       throw _handleAuthException(e);
     } on Exception catch (e, stackTrace) {
-      print('AuthRepository: Unexpected error sending password reset: $e');
-      print('Stack trace: $stackTrace');
+      developer.log('Unexpected error sending password reset', name: 'AuthRepository', error: e, stackTrace: stackTrace);
       throw Exception('Failed to send password reset email. Please try again.');
     }
   }
@@ -170,7 +168,7 @@ class AuthRepository {
         throw Exception('No authenticated user');
       }
 
-      print('AuthRepository: Updating profile for user ${firebaseUser.uid}');
+      developer.log('Updating profile for user ${firebaseUser.uid}', name: 'AuthRepository');
 
       // Update Firebase Auth profile
       if (fullName != null) {
@@ -200,8 +198,7 @@ class AuthRepository {
 
       return user;
     } on Exception catch (e, stackTrace) {
-      print('AuthRepository: Error updating profile: $e');
-      print('Stack trace: $stackTrace');
+      developer.log('Error updating profile', name: 'AuthRepository', error: e, stackTrace: stackTrace);
       throw Exception('Failed to update profile. Please try again.');
     }
   }
@@ -211,13 +208,12 @@ class AuthRepository {
     try {
       final doc = await _firestore.collection('users').doc(uid).get();
       if (!doc.exists || doc.data() == null) {
-        print('AuthRepository: User document not found for UID: $uid');
+        developer.log('User document not found for UID: $uid', name: 'AuthRepository');
         return null;
       }
       return User.fromFirestore(doc.data()!, uid);
     } on Exception catch (e, stackTrace) {
-      print('AuthRepository: Error getting user from Firestore: $e');
-      print('Stack trace: $stackTrace');
+      developer.log('Error getting user from Firestore', name: 'AuthRepository', error: e, stackTrace: stackTrace);
       return null;
     }
   }
@@ -225,17 +221,16 @@ class AuthRepository {
   /// Create user in local database for foreign key constraints
   Future<void> _createLocalUser(User user) async {
     try {
-      print('AuthRepository: Creating local user record for ${user.id}');
+      developer.log('Creating local user record for ${user.id}', name: 'AuthRepository');
 
       // For now, we'll create a simple local user record
       // This would typically integrate with your local database
       // Since we don't have the database instance here, we'll skip this
       // The database will be initialized with the user when they first use the app
 
-      print('AuthRepository: Local user record created successfully');
+      developer.log('Local user record created successfully', name: 'AuthRepository');
     } on Exception catch (e, stackTrace) {
-      print('AuthRepository: Error creating local user: $e');
-      print('Stack trace: $stackTrace');
+      developer.log('Error creating local user', name: 'AuthRepository', error: e, stackTrace: stackTrace);
       // Don't throw here as this is not critical for auth flow
     }
   }

@@ -306,8 +306,8 @@ class MotivationalNotificationService {
   /// Generate celebration message
   Future<Map<String, String>?> _generateCelebrationMessage(User user) async {
     try {
-      final totalXP = user.totalXP ?? 0;
-      final level = user.level ?? 1;
+      final totalXP = user.totalXP;
+      final level = user.level;
 
       if (totalXP == 0) return null;
 

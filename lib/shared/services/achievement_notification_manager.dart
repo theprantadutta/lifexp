@@ -112,8 +112,6 @@ class AchievementNotificationManager {
   /// Schedule follow-up encouragement after achievement
   Future<void> _scheduleAchievementFollowUp(Achievement achievement) async {
     // Schedule a motivational message 1 hour after achievement
-    final followUpTime = DateTime.now().add(const Duration(hours: 1));
-    
     final messages = _getFollowUpMessages(achievement.type);
     final message = messages[DateTime.now().second % messages.length];
     

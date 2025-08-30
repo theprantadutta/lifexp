@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -47,9 +48,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       emit(TaskLoaded(tasks: tasks));
     } on Exception catch (e, stackTrace) {
       // Log the actual error for debugging
-      print('TaskBloc: Failed to load tasks for user ${event.userId}');
-      print('Error: $e');
-      print('Stack trace: $stackTrace');
+      developer.log('Failed to load tasks for user ${event.userId}', name: 'TaskBloc', error: e, stackTrace: stackTrace);
 
       emit(
         const TaskError(
@@ -87,9 +86,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       emit(TaskLoaded(tasks: updatedTasks));
     } on Exception catch (e, stackTrace) {
       // Log the actual error for debugging
-      print('TaskBloc: Failed to create task');
-      print('Error: $e');
-      print('Stack trace: $stackTrace');
+      developer.log('Failed to create task', name: 'TaskBloc', error: e, stackTrace: stackTrace);
 
       emit(
         TaskError(
@@ -137,9 +134,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       emit(currentState.copyWith(tasks: updatedTasks));
     } on Exception catch (e, stackTrace) {
       // Log the actual error for debugging
-      print('TaskBloc: Failed to update task');
-      print('Error: $e');
-      print('Stack trace: $stackTrace');
+      developer.log('Failed to update task', name: 'TaskBloc', error: e, stackTrace: stackTrace);
 
       emit(
         TaskError(
@@ -217,9 +212,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       );
     } on Exception catch (e, stackTrace) {
       // Log the actual error for debugging
-      print('TaskBloc: Failed to complete task');
-      print('Error: $e');
-      print('Stack trace: $stackTrace');
+      developer.log('Failed to complete task', name: 'TaskBloc', error: e, stackTrace: stackTrace);
 
       emit(
         TaskError(
@@ -398,9 +391,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       emit(currentState.copyWith(tasks: updatedTasks));
     } on Exception catch (e, stackTrace) {
       // Log the actual error for debugging
-      print('TaskBloc: Failed to delete task');
-      print('Error: $e');
-      print('Stack trace: $stackTrace');
+      developer.log('Failed to delete task', name: 'TaskBloc', error: e, stackTrace: stackTrace);
 
       emit(
         TaskError(
@@ -435,9 +426,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       );
     } on Exception catch (e, stackTrace) {
       // Log the actual error for debugging
-      print('TaskBloc: Failed to filter tasks by category');
-      print('Error: $e');
-      print('Stack trace: $stackTrace');
+      developer.log('Failed to filter tasks by category', name: 'TaskBloc', error: e, stackTrace: stackTrace);
 
       emit(
         TaskError(

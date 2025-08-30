@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../services/offline_data_manager.dart';
 import '../services/offline_state_detector.dart';
@@ -43,7 +44,7 @@ abstract class OfflineAwareBloc<Event, State> extends Bloc<Event, State> {
       _connectionSubscription = _offlineManager.connectionStream.listen(
         _onConnectionChanged,
         onError: (error) {
-          print('OfflineAwareBloc: Connection stream error: $error');
+          developer.log('Connection stream error: $error', name: 'OfflineAwareBloc');
         },
       );
       
@@ -52,14 +53,14 @@ abstract class OfflineAwareBloc<Event, State> extends Bloc<Event, State> {
       _syncQueueSubscription = _offlineManager.syncQueueStream.listen(
         _onSyncQueueChanged,
         onError: (error) {
-          print('OfflineAwareBloc: Sync queue stream error: $error');
+          developer.log('Sync queue stream error: $error', name: 'OfflineAwareBloc');
         },
       );
     } else if (_stateDetector != null) {
       _connectionSubscription = _stateDetector.stateStream.listen(
         (state) => _onConnectionChanged(state == ConnectionState.online),
         onError: (error) {
-          print('OfflineAwareBloc: State detector stream error: $error');
+          developer.log('State detector stream error: $error', name: 'OfflineAwareBloc');
         },
       );
     }
@@ -93,19 +94,19 @@ abstract class OfflineAwareBloc<Event, State> extends Bloc<Event, State> {
   /// Override this method to handle connection status changes
   void onConnectionStatusChanged(bool isOnline) {
     // Default implementation - subclasses can override
-    print('OfflineAwareBloc: Connection status changed to ${isOnline ? 'online' : 'offline'}');
+    developer.log('Connection status changed to ${isOnline ? 'online' : 'offline'}', name: 'OfflineAwareBloc');
   }
 
   /// Override this method to handle coming back online
   void onBackOnline() {
     // Default implementation - subclasses can override
-    print('OfflineAwareBloc: Back online with $pendingSyncCount pending operations');
+    developer.log('Back online with $pendingSyncCount pending operations', name: 'OfflineAwareBloc');
   }
 
   /// Override this method to handle sync queue changes
   void onSyncQueueChanged(int pendingCount) {
     // Default implementation - subclasses can override
-    print('OfflineAwareBloc: Sync queue changed to $pendingCount operations');
+    developer.log('Sync queue changed to $pendingCount operations', name: 'OfflineAwareBloc');
   }
 
   /// Queue a sync operation
@@ -114,7 +115,7 @@ abstract class OfflineAwareBloc<Event, State> extends Bloc<Event, State> {
       try {
         await _offlineManager.queueSyncOperation(operation);
       } catch (e) {
-        print('OfflineAwareBloc: Failed to queue sync operation: $e');
+        developer.log('Failed to queue sync operation: $e', name: 'OfflineAwareBloc');
       }
     }
   }
@@ -125,7 +126,7 @@ abstract class OfflineAwareBloc<Event, State> extends Bloc<Event, State> {
       try {
         await _offlineManager.forceSyncAll();
       } catch (e) {
-        print('OfflineAwareBloc: Failed to force sync: $e');
+        developer.log('Failed to force sync: $e', name: 'OfflineAwareBloc');
       }
     }
   }
@@ -136,7 +137,7 @@ abstract class OfflineAwareBloc<Event, State> extends Bloc<Event, State> {
       try {
         await _offlineManager.clearSyncQueue();
       } catch (e) {
-        print('OfflineAwareBloc: Failed to clear sync queue: $e');
+        developer.log('Failed to clear sync queue: $e', name: 'OfflineAwareBloc');
       }
     }
   }
@@ -165,7 +166,7 @@ abstract class OfflineAwareBloc<Event, State> extends Bloc<Event, State> {
       
       return result;
     } catch (e) {
-      print('OfflineAwareBloc: $operationName failed: $e');
+      developer.log('$operationName failed: $e', name: 'OfflineAwareBloc');
       
       // If we have an optimistic result and we're offline, return it
       if (optimisticResult != null && isOffline) {
@@ -183,13 +184,13 @@ abstract class OfflineAwareBloc<Event, State> extends Bloc<Event, State> {
   /// Show offline message (to be implemented by UI layer)
   void showOfflineMessage(String message) {
     // This would typically be handled by the UI layer
-    print('OfflineAwareBloc: Offline message: $message');
+    developer.log('Offline message: $message', name: 'OfflineAwareBloc');
   }
 
   /// Show sync status message
   void showSyncStatusMessage(String message) {
     // This would typically be handled by the UI layer
-    print('OfflineAwareBloc: Sync status: $message');
+    developer.log('Sync status: $message', name: 'OfflineAwareBloc');
   }
 
   @override

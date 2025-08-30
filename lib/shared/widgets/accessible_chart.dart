@@ -296,16 +296,11 @@ class AccessibleBarChart extends StatelessWidget {
                   borderData: FlBorderData(show: true),
                   maxY: maxY,
                   barGroups: barGroups.asMap().entries.map((entry) {
-                    final index = entry.key;
                     final group = entry.value;
                     
                     return BarChartGroupData(
                       x: group.x,
                       barRods: group.barRods.map((rod) {
-                        final categoryName = xLabels != null && index < xLabels!.length
-                            ? xLabels![index]
-                            : 'Category ${index + 1}';
-                        
                         return BarChartRodData(
                           toY: rod.toY,
                           color: barColor ?? theme.colorScheme.primary,
@@ -440,7 +435,6 @@ class AccessiblePieChart extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: sections.asMap().entries.map((entry) {
-                        final index = entry.key;
                         final section = entry.value;
                         final percentage = ((section.value / total) * 100).round();
                         
@@ -464,7 +458,7 @@ class AccessiblePieChart extends StatelessWidget {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        section.title ?? 'Section ${index + 1}',
+                                        section.title,
                                         style: theme.textTheme.bodySmall?.copyWith(
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -506,7 +500,7 @@ class AccessiblePieChart extends StatelessWidget {
     for (var i = 0; i < sections.length; i++) {
       final section = sections[i];
       final percentage = ((section.value / total) * 100).round();
-      final title = section.title ?? 'Section ${i + 1}';
+      final title = section.title;
       buffer.write('$title: ${section.value.toInt()} ($percentage%)');
       if (i < sections.length - 1) buffer.write(', ');
     }

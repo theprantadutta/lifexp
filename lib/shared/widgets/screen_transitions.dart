@@ -387,8 +387,6 @@ class _LoadingTransitionState extends State<LoadingTransition>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return AnimatedBuilder(
       animation: _fadeAnimation,
       builder: (context, child) => Stack(

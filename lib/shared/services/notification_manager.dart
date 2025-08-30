@@ -390,8 +390,6 @@ class NotificationManager {
     String achievementName, 
     String? category,
   ) async {
-    final followUpTime = DateTime.now().add(const Duration(hours: 2));
-    
     final motivationalMessages = [
       "You're on fire! 🔥 Keep up the amazing work!",
       'That $achievementName achievement was just the beginning! 🚀',
@@ -471,9 +469,6 @@ class NotificationManager {
     if (nextMilestone == null) return;
 
     final daysToNext = nextMilestone - currentStreak;
-    final encouragementTime = DateTime.now().add(
-      Duration(days: (daysToNext * 0.5).round()),
-    );
 
     debugPrint(
       'Scheduled milestone encouragement for ${task.title}: '

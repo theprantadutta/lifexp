@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../data/models/avatar.dart';
 import '../../../data/models/world.dart';
 import '../../../shared/blocs/avatar/avatar_bloc_exports.dart';
 import '../../../shared/blocs/world/world_bloc_exports.dart';
@@ -165,7 +166,7 @@ class _WorldScreenState extends State<WorldScreen>
         categoryProgress: const {}, // TODO: Get from progress state
       );
 
-  Widget _buildWorldHeader(avatar) => Container(
+  Widget _buildWorldHeader(Avatar avatar) => Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -202,7 +203,7 @@ class _WorldScreenState extends State<WorldScreen>
                         ),
                   ),
                   Text(
-                    '${avatar.currentXp} XP • ${_getUnlockedTilesCount()} areas unlocked',
+                    '${avatar.currentXP} XP • ${_getUnlockedTilesCount()} areas unlocked',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(context)
                               .colorScheme
@@ -330,22 +331,5 @@ class _WorldScreenState extends State<WorldScreen>
         ),
       );
     }
-  }
-
-  void _customizeTile(WorldTile tile) {
-    // Show customization dialog
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Customize ${tile.type.displayName}'),
-        content: const Text('Tile customization coming soon!'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
   }
 }

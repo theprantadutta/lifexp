@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
@@ -39,11 +40,11 @@ class ImageCacheService {
       _initialized = true;
       
       if (kDebugMode) {
-        print('ImageCacheService: Initialized with cache directory: ${_cacheDirectory!.path}');
+        developer.log('Initialized with cache directory: ${_cacheDirectory!.path}', name: 'ImageCacheService');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('ImageCacheService: Failed to initialize: $e');
+        developer.log('Failed to initialize: $e', name: 'ImageCacheService');
       }
     }
   }
@@ -136,7 +137,7 @@ class ImageCacheService {
       return AssetImage(imagePath);
     } catch (e) {
       if (kDebugMode) {
-        print('ImageCacheService: Error loading image $imagePath: $e');
+        developer.log('Error loading image $imagePath: $e', name: 'ImageCacheService');
       }
       return AssetImage(imagePath);
     }
@@ -178,7 +179,7 @@ class ImageCacheService {
       return byteData?.buffer.asUint8List();
     } catch (e) {
       if (kDebugMode) {
-        print('ImageCacheService: Error optimizing image $imagePath: $e');
+        developer.log('Error optimizing image $imagePath: $e', name: 'ImageCacheService');
       }
       return null;
     }
@@ -214,7 +215,7 @@ class ImageCacheService {
     }
     
     if (kDebugMode) {
-      print('ImageCacheService: Evicted ${keysToRemove.length} items from memory cache');
+      developer.log('Evicted ${keysToRemove.length} items from memory cache', name: 'ImageCacheService');
     }
   }
 
@@ -231,7 +232,7 @@ class ImageCacheService {
       await _checkDiskCacheSize();
     } catch (e) {
       if (kDebugMode) {
-        print('ImageCacheService: Error caching to disk: $e');
+        developer.log('Error caching to disk: $e', name: 'ImageCacheService');
       }
     }
   }
@@ -294,12 +295,12 @@ class ImageCacheService {
         }
         
         if (kDebugMode) {
-          print('ImageCacheService: Cleaned ${removedSize ~/ 1024}KB from disk cache');
+          developer.log('Cleaned ${removedSize ~/ 1024}KB from disk cache', name: 'ImageCacheService');
         }
       }
     } catch (e) {
       if (kDebugMode) {
-        print('ImageCacheService: Error checking disk cache size: $e');
+        developer.log('Error checking disk cache size: $e', name: 'ImageCacheService');
       }
     }
   }
@@ -327,11 +328,11 @@ class ImageCacheService {
       }
       
       if (kDebugMode && cleanedCount > 0) {
-        print('ImageCacheService: Cleaned $cleanedCount expired cache files');
+        developer.log('Cleaned $cleanedCount expired cache files', name: 'ImageCacheService');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('ImageCacheService: Error cleaning expired cache: $e');
+        developer.log('Error cleaning expired cache: $e', name: 'ImageCacheService');
       }
     }
   }
@@ -354,11 +355,11 @@ class ImageCacheService {
         _diskCacheMap.clear();
         
         if (kDebugMode) {
-          print('ImageCacheService: Cleared all cache');
+          developer.log('Cleared all cache', name: 'ImageCacheService');
         }
       } catch (e) {
         if (kDebugMode) {
-          print('ImageCacheService: Error clearing cache: $e');
+          developer.log('Error clearing cache: $e', name: 'ImageCacheService');
         }
       }
     }
@@ -416,7 +417,7 @@ class ImageCacheService {
         await precacheImage(AssetImage(imagePath), context);
       } catch (e) {
         if (kDebugMode) {
-          print('ImageCacheService: Error preloading $imagePath: $e');
+          developer.log('Error preloading $imagePath: $e', name: 'ImageCacheService');
         }
       }
     }

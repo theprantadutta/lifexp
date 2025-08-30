@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../data/models/avatar.dart';
 import '../../../data/models/progress_period.dart';
 import '../../../data/models/task.dart';
 import '../../../shared/blocs/avatar/avatar_bloc_exports.dart';
@@ -305,7 +306,7 @@ class _ProgressScreenState extends State<ProgressScreen>
               const SizedBox(height: 16),
               ...TaskCategory.values.map((category) {
                 final categoryEntries = state.progressEntries
-                    .where((entry) => entry.category == category)
+                    .where((entry) => entry.category == category.name)
                     .toList();
                 
                 if (categoryEntries.isEmpty) return const SizedBox.shrink();
@@ -328,7 +329,7 @@ class _ProgressScreenState extends State<ProgressScreen>
     },
   );
 
-  Widget _buildAvatarOverview(avatar) => Card(
+  Widget _buildAvatarOverview(Avatar avatar) => Card(
     child: Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -358,7 +359,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${avatar.currentXp} / ${avatar.xpToNextLevel} XP',
+                      '${avatar.currentXP} / ${avatar.xpToNextLevel} XP',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context)
                             .colorScheme
@@ -368,7 +369,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                     ),
                     const SizedBox(height: 8),
                     LinearProgressIndicator(
-                      value: avatar.currentXp / avatar.xpToNextLevel,
+                      value: avatar.currentXP / avatar.xpToNextLevel,
                       backgroundColor: Theme.of(context)
                           .colorScheme
                           .surfaceContainerHighest,

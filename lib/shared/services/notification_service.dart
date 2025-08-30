@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -13,7 +12,7 @@ class NotificationService {
   NotificationService._internal();
   static final NotificationService _instance = NotificationService._internal();
 
-  final FlutterLocalNotificationsPlugin _notifications = 
+  final FlutterLocalNotificationsPlugin _notifications =
       FlutterLocalNotificationsPlugin();
 
   bool _isInitialized = false;
@@ -29,9 +28,7 @@ class NotificationService {
       );
 
       // iOS initialization
-      const iosSettings = DarwinInitializationSettings(
-        
-      );
+      const iosSettings = DarwinInitializationSettings();
 
       const initSettings = InitializationSettings(
         android: androidSettings,
@@ -43,7 +40,7 @@ class NotificationService {
         onDidReceiveNotificationResponse: _onNotificationTapped,
       );
 
-      if (result == true) {
+      if (result ?? false) {
         await _requestPermissions();
         _isInitialized = true;
         return true;
@@ -60,21 +57,24 @@ class NotificationService {
     if (Platform.isAndroid) {
       final androidPlugin = _notifications
           .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>();
-      
+            AndroidFlutterLocalNotificationsPlugin
+          >();
+
       return await androidPlugin?.requestNotificationsPermission() ?? false;
     } else if (Platform.isIOS) {
       final iosPlugin = _notifications
           .resolvePlatformSpecificImplementation<
-              IOSFlutterLocalNotificationsPlugin>();
-      
+            IOSFlutterLocalNotificationsPlugin
+          >();
+
       return await iosPlugin?.requestPermissions(
-        alert: true,
-        badge: true,
-        sound: true,
-      ) ?? false;
+            alert: true,
+            badge: true,
+            sound: true,
+          ) ??
+          false;
     }
-    
+
     return true;
   }
 
@@ -108,11 +108,14 @@ class NotificationService {
         _getNotificationDetails(task),
         payload: 'task_reminder:${task.id}',
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
+        // uiLocalNotificationDateInterpretation:
+        //     UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.dateAndTime,
       );
 
-      debugPrint('Scheduled reminder for task: ${task.title} at $scheduledTime');
+      debugPrint(
+        'Scheduled reminder for task: ${task.title} at $scheduledTime',
+      );
     } catch (e) {
       debugPrint('Failed to schedule task reminder: $e');
     }
@@ -166,8 +169,9 @@ class NotificationService {
     try {
       final id = 'streak_warning_${task.id}'.hashCode;
       const title = 'Streak Alert! 🔥';
-      final body = 'Your ${task.streakCount}-day streak for "${task.title}" '
-                   'is about to break! Complete it now to keep going.';
+      final body =
+          'Your ${task.streakCount}-day streak for "${task.title}" '
+          'is about to break! Complete it now to keep going.';
 
       await _notifications.zonedSchedule(
         id,
@@ -177,8 +181,9 @@ class NotificationService {
         _getStreakWarningDetails(),
         payload: 'streak_warning:${task.id}',
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
+        // uiLocalNotificationDateInterpretation:
+        //     UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.dateAndTime,
       );
 
       debugPrint('Scheduled streak warning for: ${task.title}');
@@ -201,7 +206,8 @@ class NotificationService {
     try {
       const id = 999999; // Use a high ID for immediate notifications
       const title = '🏆 Achievement Unlocked!';
-      final body = '$achievementName\n$description${xpReward != null ? '\n+$xpReward XP' : ''}';
+      final body =
+          '$achievementName\n$description${xpReward != null ? '\n+$xpReward XP' : ''}';
 
       await _notifications.show(
         id,
@@ -259,10 +265,10 @@ class NotificationService {
     try {
       final id = taskId.hashCode;
       await _notifications.cancel(id);
-      
+
       final streakWarningId = 'streak_warning_$taskId'.hashCode;
       await _notifications.cancel(streakWarningId);
-      
+
       debugPrint('Cancelled reminders for task: $taskId');
     } catch (e) {
       debugPrint('Failed to cancel task reminders: $e');
@@ -282,7 +288,7 @@ class NotificationService {
   /// Get notification details for task reminders
   NotificationDetails _getNotificationDetails(Task task) {
     final categoryColor = _getCategoryColor(task.category);
-    
+
     final androidDetails = AndroidNotificationDetails(
       'task_reminders',
       'Task Reminders',
@@ -297,10 +303,7 @@ class NotificationService {
           'Complete',
           showsUserInterface: true,
         ),
-        const AndroidNotificationAction(
-          'snooze',
-          'Snooze 1h',
-        ),
+        const AndroidNotificationAction('snooze', 'Snooze 1h'),
       ],
     );
 
@@ -309,10 +312,7 @@ class NotificationService {
       interruptionLevel: InterruptionLevel.active,
     );
 
-    return NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
+    return NotificationDetails(android: androidDetails, iOS: iosDetails);
   }
 
   /// Get notification details for streak warnings
@@ -323,7 +323,7 @@ class NotificationService {
       channelDescription: 'Warnings when your streaks are about to break',
       importance: Importance.max,
       priority: Priority.max,
-      color: const Color(0xFFFF6B35), // Orange warning color
+      color: Color(0xFFFF6B35), // Orange warning color
       icon: '@drawable/ic_streak',
       actions: [
         AndroidNotificationAction(
@@ -339,10 +339,7 @@ class NotificationService {
       interruptionLevel: InterruptionLevel.timeSensitive,
     );
 
-    return const NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
+    return const NotificationDetails(android: androidDetails, iOS: iosDetails);
   }
 
   /// Get notification details for achievements
@@ -353,7 +350,7 @@ class NotificationService {
       channelDescription: 'Achievement unlock notifications',
       importance: Importance.high,
       priority: Priority.high,
-      color: const Color(0xFFFFD700), // Gold color
+      color: Color(0xFFFFD700), // Gold color
       icon: '@drawable/ic_achievement',
     );
 
@@ -363,10 +360,7 @@ class NotificationService {
       sound: 'achievement.wav',
     );
 
-    return const NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
+    return const NotificationDetails(android: androidDetails, iOS: iosDetails);
   }
 
   /// Get notification details for XP gains
@@ -377,7 +371,7 @@ class NotificationService {
       channelDescription: 'Experience point gain notifications',
       importance: Importance.low,
       priority: Priority.low,
-      color: const Color(0xFF4CAF50), // Green color
+      color: Color(0xFF4CAF50), // Green color
       icon: '@drawable/ic_xp',
       timeoutAfter: 3000, // Auto-dismiss after 3 seconds
     );
@@ -387,10 +381,7 @@ class NotificationService {
       interruptionLevel: InterruptionLevel.passive,
     );
 
-    return const NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
+    return const NotificationDetails(android: androidDetails, iOS: iosDetails);
   }
 
   /// Get color for task category
@@ -420,14 +411,15 @@ class NotificationService {
   /// Check if notifications are enabled
   Future<bool> areNotificationsEnabled() async {
     if (!_isInitialized) return false;
-    
+
     if (Platform.isAndroid) {
       final androidPlugin = _notifications
           .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>();
+            AndroidFlutterLocalNotificationsPlugin
+          >();
       return await androidPlugin?.areNotificationsEnabled() ?? false;
     }
-    
+
     return true; // iOS handles this at the system level
   }
 
@@ -445,11 +437,12 @@ class NotificationService {
 /// Time of day helper
 class TimeOfDay {
   const TimeOfDay({required this.hour, required this.minute});
-  
+
   final int hour;
   final int minute;
-  
+
   @override
-  String toString() => '${hour.toString().padLeft(2, '0')}:'
-                      '${minute.toString().padLeft(2, '0')}';
+  String toString() =>
+      '${hour.toString().padLeft(2, '0')}:'
+      '${minute.toString().padLeft(2, '0')}';
 }

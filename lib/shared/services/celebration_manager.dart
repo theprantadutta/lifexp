@@ -21,10 +21,12 @@ class CelebrationManager {
     // Wait a bit then show the main celebration
     await Future.delayed(const Duration(milliseconds: 500));
     
-    AnimationService.showLevelUpCelebration(
-      context,
-      newLevel: newLevel,
-    );
+    if (context.mounted) {
+      AnimationService.showLevelUpCelebration(
+        context,
+        newLevel: newLevel,
+      );
+    }
 
     // Play sound effect (if available)
     _playLevelUpSound();
