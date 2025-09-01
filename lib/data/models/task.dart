@@ -400,6 +400,21 @@ class Task extends Equatable {
     'updatedAt': updatedAt.toIso8601String(),
   };
 
+  /// Creates an empty task for fallback purposes
+  factory Task.empty() => Task(
+        id: '',
+        title: '',
+        description: '',
+        type: TaskType.daily,
+        category: TaskCategory.custom,
+        xpReward: 0,
+        difficulty: 1,
+        isCompleted: false,
+        streakCount: 0,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
   /// Converts to Map (alias for toJson for repository compatibility)
   Map<String, dynamic> toMap() => toJson();
 

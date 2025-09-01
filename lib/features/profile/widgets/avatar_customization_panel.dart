@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../shared/blocs/avatar/avatar_bloc.dart';
 import '../../../shared/blocs/avatar/avatar_event.dart';
 import '../../../shared/blocs/avatar/avatar_state.dart';
+import '../../../shared/widgets/interactive_avatar.dart';
+import '../../../data/models/avatar.dart';
 
 /// Panel for customizing avatar appearance
 class AvatarCustomizationPanel extends StatefulWidget {
@@ -15,6 +17,7 @@ class AvatarCustomizationPanel extends StatefulWidget {
 
 class _AvatarCustomizationPanelState extends State<AvatarCustomizationPanel> {
   int _selectedCategory = 0;
+  Map<String, String> _tempCustomizations = {};
   
   final List<String> _categories = [
     'Hair',
@@ -41,6 +44,17 @@ class _AvatarCustomizationPanelState extends State<AvatarCustomizationPanel> {
 
         return Column(
           children: [
+            // Real-time preview
+            Container(
+              padding: const EdgeInsets.all(16),
+              child: AvatarPreview(
+                avatar: state.avatar,
+                customizations: _tempCustomizations,
+                size: 150,
+                showPreviewAnimation: false,
+              ),
+            ),
+            
             // Category tabs
             Container(
               height: 48,
@@ -92,17 +106,34 @@ class _AvatarCustomizationPanelState extends State<AvatarCustomizationPanel> {
               padding: const EdgeInsets.all(16),
               child: _buildCustomizationOptions(context, state.avatar),
             ),
+            
+            // Apply button
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: ElevatedButton(
+                onPressed: () => _applyCustomizations(context, state.avatar),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colorScheme.primary,
+                  foregroundColor: colorScheme.onPrimary,
+                  minimumSize: const Size(double.infinity, 48),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text('Apply Changes'),
+              ),
+            ),
           ],
         );
       },
     );
   }
 
-  Widget _buildCustomizationOptions(BuildContext context, avatar) {
+  Widget _buildCustomizationOptions(BuildContext context, Avatar avatar) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    // Mock customization options for demonstration
+    // Get customization options for the selected category
     final options = _getOptionsForCategory(_selectedCategory);
 
     return GridView.builder(
@@ -114,12 +145,12 @@ class _AvatarCustomizationPanelState extends State<AvatarCustomizationPanel> {
       itemCount: options.length,
       itemBuilder: (context, index) {
         final option = options[index];
-        final isSelected = _isOptionSelected(option);
+        final isSelected = _isOptionSelected(option, avatar);
         final isUnlocked = _isOptionUnlocked(option, avatar);
 
         return GestureDetector(
           onTap: isUnlocked
-              ? () => _selectOption(context, option)
+              ? () => _selectOption(context, option, avatar)
               : () => _showUnlockDialog(context, option),
           child: DecoratedBox(
             decoration: BoxDecoration(
@@ -213,30 +244,75 @@ class _AvatarCustomizationPanelState extends State<AvatarCustomizationPanel> {
     }
   }
 
-  bool _isOptionSelected(Map<String, dynamic> option) {
-    // TODO: Check if option is currently selected on avatar
-    return option['id'] == 'hair_1' || option['id'] == 'eyes_1' || 
-           option['id'] == 'shirt_1' || option['id'] == 'acc_1';
+  bool _isOptionSelected(Map<String, dynamic> option, Avatar avatar) {
+    final categoryKey = _getCategoryKey(_selectedCategory);
+    
+    // Check if this option is currently selected in temporary customizations
+    if (_tempCustomizations.containsKey(categoryKey)) {
+      return _tempCustomizations[categoryKey] == option['id'];
+    }
+    
+    // Otherwise check the avatar's current appearance
+    switch (_selectedCategory) {
+      case 0: // Hair
+        return avatar.appearance.hairStyle == option['id'];
+      case 1: // Eyes
+        return avatar.appearance.eyeColor == option['id'];
+      case 2: // Clothing
+        return avatar.appearance.clothing == option['id'];
+      case 3: // Accessories
+        return avatar.appearance.accessories == option['id'];
+      default:
+        return false;
+    }
   }
 
-  bool _isOptionUnlocked(Map<String, dynamic> option, avatar) {
+  bool _isOptionUnlocked(Map<String, dynamic> option, Avatar avatar) {
     final requiredLevel = option['unlockLevel'] as int;
     return avatar.level >= requiredLevel;
   }
 
-  void _selectOption(BuildContext context, Map<String, dynamic> option) {
-    // TODO: Implement avatar customization
+  void _selectOption(BuildContext context, Map<String, dynamic> option, Avatar avatar) {
+    final categoryKey = _getCategoryKey(_selectedCategory);
+    
+    // Update temporary customizations for preview
+    setState(() {
+      _tempCustomizations = Map<String, String>.from(_tempCustomizations);
+      _tempCustomizations[categoryKey] = option['id'] as String;
+    });
+
+    // Show selection feedback
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${option['name']} selected for preview'),
+        duration: const Duration(seconds: 1),
+      ),
+    );
+  }
+
+  void _applyCustomizations(BuildContext context, Avatar avatar) {
+    // Create updated appearance based on temporary customizations
+    final updatedAppearance = avatar.appearance.copyWith(
+      hairStyle: _tempCustomizations['hair'] ?? avatar.appearance.hairStyle,
+      hairColor: _tempCustomizations['hairColor'] ?? avatar.appearance.hairColor,
+      eyeColor: _tempCustomizations['eyes'] ?? avatar.appearance.eyeColor,
+      clothing: _tempCustomizations['clothing'] ?? avatar.appearance.clothing,
+      accessories: _tempCustomizations['accessory'] ?? avatar.appearance.accessories,
+    );
+
+    // Dispatch update appearance event
     context.read<AvatarBloc>().add(
-      AvatarCustomizationChanged(
-        category: _categories[_selectedCategory].toLowerCase(),
-        optionId: option['id'] as String,
+      UpdateAppearance(
+        avatarId: avatar.id,
+        appearance: updatedAppearance,
       ),
     );
 
+    // Show confirmation
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('${option['name']} selected!'),
-        duration: const Duration(seconds: 1),
+      const SnackBar(
+        content: Text('Avatar customization applied!'),
+        duration: Duration(seconds: 2),
       ),
     );
   }
@@ -259,5 +335,15 @@ class _AvatarCustomizationPanelState extends State<AvatarCustomizationPanel> {
         ],
       ),
     );
+  }
+
+  String _getCategoryKey(int categoryIndex) {
+    switch (categoryIndex) {
+      case 0: return 'hair';
+      case 1: return 'eyes';
+      case 2: return 'clothing';
+      case 3: return 'accessory';
+      default: return '';
+    }
   }
 }

@@ -5,9 +5,17 @@ import '../../../shared/blocs/achievement/achievement_bloc.dart';
 import '../../../shared/blocs/achievement/achievement_state.dart';
 import '../../../shared/widgets/achievement_badge.dart';
 
-/// Gallery displaying user's achievements
-class AchievementGallery extends StatelessWidget {
+/// Gallery displaying user's achievements with unlock animations
+class AchievementGallery extends StatefulWidget {
   const AchievementGallery({super.key});
+
+  @override
+  State<AchievementGallery> createState() => _AchievementGalleryState();
+}
+
+class _AchievementGalleryState extends State<AchievementGallery> {
+  String _selectedFilter = 'all';
+  final List<String> _filters = ['all', 'unlocked', 'locked'];
 
   @override
   Widget build(BuildContext context) {
@@ -59,6 +67,19 @@ class AchievementGallery extends StatelessWidget {
         final achievements = state.achievements;
         final unlockedAchievements = achievements.where((a) => a.isUnlocked).toList();
         final lockedAchievements = achievements.where((a) => !a.isUnlocked).toList();
+        
+        // Filter achievements based on selected filter
+        List filteredAchievements;
+        switch (_selectedFilter) {
+          case 'unlocked':
+            filteredAchievements = unlockedAchievements;
+            break;
+          case 'locked':
+            filteredAchievements = lockedAchievements;
+            break;
+          default:
+            filteredAchievements = achievements;
+        }
 
         if (achievements.isEmpty) {
           return Container(
@@ -104,102 +125,91 @@ class AchievementGallery extends StatelessWidget {
           ),
           child: Column(
             children: [
-              // Unlocked achievements
-              if (unlockedAchievements.isNotEmpty) ...[
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.emoji_events,
-                        color: colorScheme.primary,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Unlocked (${unlockedAchievements.length})',
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          color: colorScheme.onSurface,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
+              // Filter tabs
+              Container(
+                height: 48,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainerHighest,
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(12),
                   ),
                 ),
-                Container(
-                  height: 120,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: unlockedAchievements.length,
-                    separatorBuilder: (context, index) => const SizedBox(width: 12),
-                    itemBuilder: (context, index) {
-                      final achievement = unlockedAchievements[index];
-                      return GestureDetector(
-                        onTap: () => _showAchievementDetails(context, achievement),
-                        child: AchievementBadge(
-                          title: achievement.title,
-                          description: achievement.description,
-                          iconPath: 'assets/icons/achievement.png',
-                          isUnlocked: achievement.isUnlocked,
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(height: 16),
-              ],
-
-              // Locked achievements
-              if (lockedAchievements.isNotEmpty) ...[
-                if (unlockedAchievements.isNotEmpty)
-                  Divider(
-                    color: colorScheme.outline.withValues(alpha: 0.2),
-                    height: 1,
-                  ),
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.lock_outline,
-                        color: colorScheme.onSurfaceVariant,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Locked (${lockedAchievements.length})',
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                          fontWeight: FontWeight.bold,
+                child: Row(
+                  children: _filters.map((filter) {
+                    final isSelected = _selectedFilter == filter;
+                    return Expanded(
+                      child: GestureDetector(
+                        onTap: () => setState(() => _selectedFilter = filter),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? colorScheme.primary.withValues(alpha: 0.2)
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Center(
+                            child: Text(
+                              filter == 'all' 
+                                  ? 'All (${achievements.length})' 
+                                  : filter == 'unlocked' 
+                                      ? 'Unlocked (${unlockedAchievements.length})' 
+                                      : 'Locked (${lockedAchievements.length})',
+                              style: theme.textTheme.labelMedium?.copyWith(
+                                color: isSelected
+                                    ? colorScheme.primary
+                                    : colorScheme.onSurfaceVariant,
+                                fontWeight: isSelected
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                    ],
-                  ),
+                    );
+                  }).toList(),
                 ),
-                Container(
-                  height: 120,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: lockedAchievements.length,
-                    separatorBuilder: (context, index) => const SizedBox(width: 12),
-                    itemBuilder: (context, index) {
-                      final achievement = lockedAchievements[index];
-                      return GestureDetector(
-                        onTap: () => _showAchievementDetails(context, achievement),
-                        child: AchievementBadge(
-                          title: achievement.title,
-                          description: achievement.description,
-                          iconPath: 'assets/icons/achievement.png',
-                          isUnlocked: achievement.isUnlocked,
-                        ),
-                      );
-                    },
-                  ),
+              ),
+              
+              // Achievement grid
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final crossAxisCount = constraints.maxWidth > 600 ? 4 : 3;
+                    return GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossAxisCount,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        childAspectRatio: 0.8,
+                      ),
+                      itemCount: filteredAchievements.length,
+                      itemBuilder: (context, index) {
+                        final achievement = filteredAchievements[index];
+                        // Check if this achievement was recently unlocked
+                        final isRecentlyUnlocked = state.recentUnlocks
+                            .any((recent) => recent.id == achievement.id);
+                        
+                        return GestureDetector(
+                          onTap: () => _showAchievementDetails(context, achievement),
+                          child: AchievementBadge(
+                            title: achievement.title,
+                            description: achievement.description,
+                            iconPath: 'assets/icons/achievement.png',
+                            isUnlocked: achievement.isUnlocked,
+                            tier: achievement.tier,
+                            showUnlockAnimation: isRecentlyUnlocked,
+                          ),
+                        );
+                      },
+                    );
+                  },
                 ),
-                const SizedBox(height: 16),
-              ],
+              ),
             ],
           ),
         );
@@ -221,6 +231,7 @@ class AchievementGallery extends StatelessWidget {
               description: achievement.description,
               iconPath: 'assets/icons/achievement.png',
               isUnlocked: achievement.isUnlocked,
+              tier: achievement.tier,
               size: 40,
             ),
             const SizedBox(width: 12),

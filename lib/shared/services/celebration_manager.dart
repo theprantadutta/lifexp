@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../widgets/particle_celebration.dart';
+import '../widgets/xp_gain_animation.dart';
+import '../widgets/level_up_animation.dart';
+import '../widgets/streak_milestone_animation.dart';
+import '../widgets/achievement_unlock_animation.dart';
 import 'animation_service.dart';
 
 /// Manager for coordinating celebration animations and effects
@@ -17,6 +21,9 @@ class CelebrationManager {
 
     // Show confetti first
     _showConfettiOverlay(context);
+
+    // Show level up animation
+    showLevelUp(context, newLevel);
 
     // Wait a bit then show the main celebration
     await Future.delayed(const Duration(milliseconds: 500));
@@ -44,6 +51,9 @@ class CelebrationManager {
     // Show particle effects
     _showParticleOverlay(context);
 
+    // Show achievement unlock animation
+    showAchievementUnlockAnimation(context, achievementName);
+
     // Show achievement notification
     AnimationService.showAchievementUnlock(
       context,
@@ -64,8 +74,12 @@ class CelebrationManager {
     // Light haptic feedback
     HapticFeedback.lightImpact();
 
+    // Show XP gain animation
+    showXPGain(context, xpGained);
+
     if (isStreakMilestone && streakCount != null) {
       // Show streak milestone celebration
+      showStreakMilestone(context, streakCount);
       AnimationService.showStreakMilestone(
         context,
         streakCount: streakCount,
@@ -160,6 +174,106 @@ class CelebrationManager {
   static void _playTaskCompleteSound() {
     // TODO: Implement sound effects
     // SystemSound.play(SystemSoundType.click);
+  }
+
+  /// Shows XP gain animation
+  static void showXPGain(BuildContext context, int xpAmount) {
+    final overlay = Overlay.of(context);
+    late OverlayEntry overlayEntry;
+
+    overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: 100,
+        left: 0,
+        right: 0,
+        child: IgnorePointer(
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: XPGainAnimation(
+              xpAmount: xpAmount,
+              onComplete: () => overlayEntry.remove(),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlay.insert(overlayEntry);
+  }
+
+  /// Shows level up animation
+  static void showLevelUp(BuildContext context, int newLevel) {
+    final overlay = Overlay.of(context);
+    late OverlayEntry overlayEntry;
+
+    overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: 100,
+        left: 0,
+        right: 0,
+        child: IgnorePointer(
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: LevelUpAnimation(
+              newLevel: newLevel,
+              onComplete: () => overlayEntry.remove(),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlay.insert(overlayEntry);
+  }
+
+  /// Shows streak milestone animation
+  static void showStreakMilestone(BuildContext context, int streakCount) {
+    final overlay = Overlay.of(context);
+    late OverlayEntry overlayEntry;
+
+    overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: 100,
+        left: 0,
+        right: 0,
+        child: IgnorePointer(
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: StreakMilestoneAnimation(
+              streakCount: streakCount,
+              onComplete: () => overlayEntry.remove(),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlay.insert(overlayEntry);
+  }
+
+  /// Shows achievement unlock animation
+  static void showAchievementUnlockAnimation(BuildContext context, String achievementName) {
+    final overlay = Overlay.of(context);
+    late OverlayEntry overlayEntry;
+
+    overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: 100,
+        left: 0,
+        right: 0,
+        child: IgnorePointer(
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: AchievementUnlockAnimation(
+              achievementName: achievementName,
+              onComplete: () => overlayEntry.remove(),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlay.insert(overlayEntry);
   }
 
   /// Plays streak sound effect

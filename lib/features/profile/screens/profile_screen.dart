@@ -11,6 +11,10 @@ import '../../../shared/blocs/theme/theme_state.dart';
 import '../widgets/achievement_gallery.dart';
 import '../widgets/avatar_customization_panel.dart';
 import '../widgets/profile_stats_card.dart';
+import 'avatar_customization_screen.dart';
+import 'achievement_gallery_screen.dart';
+import 'notification_settings_screen.dart';
+import 'sync_management_screen.dart';
 
 /// Profile screen with avatar customization and achievements
 class ProfileScreen extends StatelessWidget {
@@ -174,12 +178,27 @@ class ProfileScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Customize Avatar',
-          style: theme.textTheme.titleLarge?.copyWith(
-            color: colorScheme.onSurface,
-            fontWeight: FontWeight.bold,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Customize Avatar',
+              style: theme.textTheme.titleLarge?.copyWith(
+                color: colorScheme.onSurface,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const AvatarCustomizationScreen(),
+                  ),
+                );
+              },
+              child: const Text('Full Screen'),
+            ),
+          ],
         ),
         const SizedBox(height: 12),
         DecoratedBox(
@@ -215,11 +234,21 @@ class ProfileScreen extends StatelessWidget {
             ),
             if (state is AchievementLoaded)
               Text(
-                '${state.achievements.where((a) => a.isUnlocked).length}/${state.achievements.length}',
+                '${state.unlockedAchievements.length}/${state.achievements.length}',
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const AchievementGalleryScreen(),
+                  ),
+                );
+              },
+              child: const Text('View All'),
+            ),
           ],
         ),
         const SizedBox(height: 12),
@@ -256,19 +285,42 @@ class ProfileScreen extends StatelessWidget {
                 ),
             ),
             
-            // Notifications toggle
+            // Notifications settings
             ListTile(
               leading: Icon(
                 Icons.notifications,
                 color: colorScheme.primary,
               ),
               title: const Text('Notifications'),
-              trailing: Switch(
-                value: true, // TODO: Connect to notification settings
-                onChanged: (value) {
-                  // TODO: Implement notification toggle
-                },
+              subtitle: const Text('Manage notification preferences'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const NotificationSettingsScreen(),
+                  ),
+                );
+              },
+            ),
+
+            // Sync management
+            ListTile(
+              leading: Icon(
+                Icons.cloud_sync,
+                color: colorScheme.primary,
               ),
+              title: const Text('Sync Management'),
+              subtitle: const Text('Manage cloud synchronization'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const SyncManagementScreen(),
+                  ),
+                );
+              },
             ),
 
             // About

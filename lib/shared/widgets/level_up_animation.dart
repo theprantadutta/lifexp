@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 
-/// Widget that shows an XP gain animation
-class XPGainAnimation extends StatefulWidget {
-  const XPGainAnimation({
+/// Widget that shows a level up animation
+class LevelUpAnimation extends StatefulWidget {
+  const LevelUpAnimation({
     super.key,
-    required this.xpAmount,
+    required this.newLevel,
     this.onComplete,
-    this.duration = const Duration(milliseconds: 1500),
+    this.duration = const Duration(milliseconds: 2000),
   });
 
-  final int xpAmount;
+  final int newLevel;
   final VoidCallback? onComplete;
   final Duration duration;
 
   @override
-  State<XPGainAnimation> createState() => _XPGainAnimationState();
+  State<LevelUpAnimation> createState() => _LevelUpAnimationState();
 }
 
-class _XPGainAnimationState extends State<XPGainAnimation>
+class _LevelUpAnimationState extends State<LevelUpAnimation>
     with TickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
@@ -54,7 +54,7 @@ class _XPGainAnimationState extends State<XPGainAnimation>
     );
 
     _positionAnimation = Tween<double>(
-      begin: 50.0,
+      begin: 100.0,
       end: 0.0,
     ).animate(
       CurvedAnimation(
@@ -64,7 +64,7 @@ class _XPGainAnimationState extends State<XPGainAnimation>
     );
 
     _controller.forward().then((_) {
-      Future.delayed(const Duration(milliseconds: 500), () {
+      Future.delayed(const Duration(milliseconds: 1000), () {
         if (mounted) {
           widget.onComplete?.call();
         }
@@ -92,33 +92,52 @@ class _XPGainAnimationState extends State<XPGainAnimation>
           child: Transform.translate(
             offset: Offset(0, -_positionAnimation.value),
             child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
-              ),
+              padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: colorScheme.primary.withValues(alpha: 0.9),
-                borderRadius: BorderRadius.circular(20),
+                gradient: LinearGradient(
+                  colors: [
+                    colorScheme.primary,
+                    colorScheme.secondary,
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: colorScheme.primary.withValues(alpha: 0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
+                    color: colorScheme.primary.withValues(alpha: 0.5),
+                    blurRadius: 16,
+                    offset: const Offset(0, 8),
                   ),
                 ],
               ),
-              child: Row(
+              child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    Icons.star,
+                    Icons.trending_up,
                     color: colorScheme.onPrimary,
-                    size: 20,
+                    size: 48,
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(height: 16),
                   Text(
-                    '+${widget.xpAmount} XP',
-                    style: theme.textTheme.titleMedium?.copyWith(
+                    'LEVEL UP!',
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      color: colorScheme.onPrimary,
+                      fontWeight: FontWeight.bold,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black.withValues(alpha: 0.5),
+                          offset: const Offset(0, 2),
+                          blurRadius: 4,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Level ${widget.newLevel}',
+                    style: theme.textTheme.headlineSmall?.copyWith(
                       color: colorScheme.onPrimary,
                       fontWeight: FontWeight.bold,
                       shadows: [

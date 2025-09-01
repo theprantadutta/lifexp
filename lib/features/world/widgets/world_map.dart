@@ -8,28 +8,58 @@ class WorldMap extends StatefulWidget {
     required this.tiles,
     required this.onTileSelected,
     this.selectedTile,
+    this.recentlyUnlockedTiles = const [],
     super.key,
   });
 
   final List<WorldTile> tiles;
   final Function(WorldTile) onTileSelected;
   final WorldTile? selectedTile;
+  final List<WorldTile> recentlyUnlockedTiles;
 
   @override
   State<WorldMap> createState() => _WorldMapState();
 }
 
-class _WorldMapState extends State<WorldMap> {
+class _WorldMapState extends State<WorldMap>
+    with SingleTickerProviderStateMixin {
   final TransformationController _transformationController =
       TransformationController();
-  
+  late AnimationController _unlockAnimationController;
+  late Animation<double> _unlockScaleAnimation;
+  late Animation<double> _unlockOpacityAnimation;
+
   static const int gridSize = 20; // 20x20 grid
   static const double tileSize = 40;
   static const double spacing = 2;
 
   @override
+  void initState() {
+    super.initState();
+    _unlockAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    );
+
+    _unlockScaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _unlockAnimationController,
+        curve: Curves.elasticOut,
+      ),
+    );
+
+    _unlockOpacityAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _unlockAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+  }
+
+  @override
   void dispose() {
     _transformationController.dispose();
+    _unlockAnimationController.dispose();
     super.dispose();
   }
 
@@ -72,7 +102,7 @@ class _WorldMapState extends State<WorldMap> {
           final x = index % gridSize;
           final y = index ~/ gridSize;
           final tile = _getTileAt(x, y);
-          
+
           return _buildTile(tile, x, y);
         },
       );
@@ -80,83 +110,108 @@ class _WorldMapState extends State<WorldMap> {
   Widget _buildTile(WorldTile? tile, int x, int y) {
     final isSelected = tile != null && tile == widget.selectedTile;
     final isEmpty = tile == null;
-    
+    final isRecentlyUnlocked = tile != null &&
+        widget.recentlyUnlockedTiles.any((t) => t.id == tile.id);
+
     if (isEmpty) {
       return _buildEmptyTile(x, y);
     }
 
     return GestureDetector(
       onTap: () => widget.onTileSelected(tile),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        decoration: BoxDecoration(
-          color: _getTileColor(tile),
-          borderRadius: BorderRadius.circular(4),
-          border: isSelected
-              ? Border.all(
-                  color: Theme.of(context).colorScheme.primary,
-                  width: 2,
-                )
-              : null,
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .primary
-                        .withValues(alpha: 0.3),
-                    blurRadius: 8,
-                    spreadRadius: 2,
+      child: AnimatedBuilder(
+        animation: _unlockAnimationController,
+        builder: (context, child) => Transform.scale(
+          scale: isRecentlyUnlocked ? _unlockScaleAnimation.value : 1.0,
+          child: Opacity(
+            opacity: isRecentlyUnlocked ? _unlockOpacityAnimation.value : 1.0,
+            child: Container(
+              decoration: BoxDecoration(
+                color: _getTileColor(tile),
+                borderRadius: BorderRadius.circular(4),
+                border: isSelected
+                    ? Border.all(
+                        color: Theme.of(context).colorScheme.primary,
+                        width: 2,
+                      )
+                    : null,
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .primary
+                              .withValues(alpha: 0.3),
+                          blurRadius: 8,
+                          spreadRadius: 2,
+                        ),
+                      ]
+                    : tile.isUnlocked
+                        ? [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.1),
+                              blurRadius: 2,
+                              offset: const Offset(1, 1),
+                            ),
+                          ]
+                        : null,
+              ),
+              child: Stack(
+                children: [
+                  // Base tile content
+                  Center(
+                    child: _buildTileContent(tile),
                   ),
-                ]
-              : tile.isUnlocked
-                  ? [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
-                        blurRadius: 2,
-                        offset: const Offset(1, 1),
+
+                  // Unlock overlay for locked tiles
+                  if (!tile.isUnlocked)
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.6),
+                        borderRadius: BorderRadius.circular(4),
                       ),
-                    ]
-                  : null,
-        ),
-        child: Stack(
-          children: [
-            // Base tile content
-            Center(
-              child: _buildTileContent(tile),
+                      child: const Center(
+                        child: Icon(
+                          Icons.lock,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                      ),
+                    ),
+
+                  // Selection indicator
+                  if (isSelected)
+                    Positioned(
+                      top: 2,
+                      right: 2,
+                      child: Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primary,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+
+                  // Recently unlocked animation
+                  if (isRecentlyUnlocked)
+                    Positioned.fill(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.rectangle,
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.primary,
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
-            
-            // Unlock overlay for locked tiles
-            if (!tile.isUnlocked)
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.6),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: const Center(
-                  child: Icon(
-                    Icons.lock,
-                    color: Colors.white,
-                    size: 16,
-                  ),
-                ),
-              ),
-            
-            // Selection indicator
-            if (isSelected)
-              Positioned(
-                top: 2,
-                right: 2,
-                child: Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-          ],
+          ),
         ),
       ),
     );
@@ -224,7 +279,7 @@ class _WorldMapState extends State<WorldMap> {
     }
 
     final baseColor = _getTileTypeColor(tile.type);
-    
+
     // Brighten color based on unlock status
     final levelMultiplier = tile.isUnlocked ? 1.2 : 0.6;
     return Color.lerp(
@@ -279,7 +334,7 @@ class _WorldMapState extends State<WorldMap> {
   Color _getTerrainColor(int x, int y) {
     // Create varied terrain based on position
     final hash = (x * 31 + y * 17) % 100;
-    
+
     if (hash < 30) {
       return Colors.green.shade300; // Grass
     } else if (hash < 50) {
@@ -293,7 +348,7 @@ class _WorldMapState extends State<WorldMap> {
 
   IconData _getTerrainIcon(int x, int y) {
     final hash = (x * 31 + y * 17) % 100;
-    
+
     if (hash < 30) {
       return Icons.grass;
     } else if (hash < 50) {

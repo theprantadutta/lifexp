@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../data/models/avatar.dart';
+import '../../../data/models/progress.dart';
 import '../../../data/models/progress_period.dart';
 import '../../../data/models/task.dart';
 import '../../../shared/blocs/avatar/avatar_bloc_exports.dart';
@@ -9,7 +10,10 @@ import '../../../shared/blocs/progress/progress_bloc_exports.dart';
 import '../../../shared/providers/user_context.dart';
 import '../../../shared/widgets/attribute_bar.dart';
 import '../widgets/category_breakdown_chart.dart';
+import '../widgets/comparative_analytics_chart.dart';
+import '../widgets/productivity_patterns_chart.dart';
 import '../widgets/progress_stats_card.dart';
+import '../widgets/trend_analysis_chart.dart';
 import '../widgets/xp_chart.dart';
 
 /// Progress screen for viewing analytics and progress charts
@@ -251,6 +255,9 @@ class _ProgressScreenState extends State<ProgressScreen>
       }
 
       if (state is ProgressLoaded) {
+        // Get previous period entries for comparison
+        final previousPeriodEntries = _getPreviousPeriodEntries(state.progressEntries);
+        
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -273,6 +280,36 @@ class _ProgressScreenState extends State<ProgressScreen>
               const SizedBox(height: 16),
               CategoryBreakdownChart(
                 progressEntries: state.progressEntries,
+              ),
+              const SizedBox(height: 32),
+              Text(
+                'Trend Analysis',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              const SizedBox(height: 16),
+              TrendAnalysisChart(
+                progressEntries: state.progressEntries,
+                period: _selectedPeriod,
+              ),
+              const SizedBox(height: 32),
+              Text(
+                'Productivity Patterns',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              const SizedBox(height: 16),
+              ProductivityPatternsChart(
+                progressEntries: state.progressEntries,
+              ),
+              const SizedBox(height: 32),
+              Text(
+                'Period Comparison',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              const SizedBox(height: 16),
+              ComparativeAnalyticsChart(
+                currentPeriodEntries: state.progressEntries,
+                previousPeriodEntries: previousPeriodEntries,
+                currentPeriod: _selectedPeriod,
               ),
             ],
           ),
@@ -615,5 +652,13 @@ class _ProgressScreenState extends State<ProgressScreen>
       case ProgressPeriod.year:
         return 'Year';
     }
+  }
+
+  List<ProgressEntry> _getPreviousPeriodEntries(List<ProgressEntry> currentEntries) {
+    if (currentEntries.isEmpty) return <ProgressEntry>[];
+    
+    // For simplicity, we'll return an empty list for now
+    // In a real implementation, this would fetch data for the previous period
+    return <ProgressEntry>[];
   }
 }

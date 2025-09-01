@@ -155,6 +155,7 @@ class _WorldScreenState extends State<WorldScreen>
                 });
               },
               selectedTile: _selectedTile,
+              recentlyUnlockedTiles: worldState.recentUnlocks,
             ),
           ),
         ],

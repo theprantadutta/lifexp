@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../data/models/task.dart';
 import '../../../shared/blocs/task/task_bloc_exports.dart';
 import '../../../shared/providers/user_context.dart';
+import '../../../shared/services/celebration_manager.dart';
 import '../../../shared/widgets/task_card.dart';
 import '../widgets/add_task_dialog.dart';
 
@@ -16,7 +17,7 @@ class TasksScreen extends StatefulWidget {
 }
 
 class _TasksScreenState extends State<TasksScreen>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, CelebrationMixin {
   late TabController _tabController;
   TaskCategory? _selectedCategory;
 
@@ -43,42 +44,80 @@ class _TasksScreenState extends State<TasksScreen>
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(
-      title: const Text('Tasks'),
-      centerTitle: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      elevation: 0,
-      automaticallyImplyLeading: false,
-      bottom: TabBar(
-        controller: _tabController,
-        tabs: const [
-          Tab(text: 'Daily', icon: Icon(Icons.today)),
-          Tab(text: 'Weekly', icon: Icon(Icons.view_week)),
-          Tab(text: 'Long-term', icon: Icon(Icons.flag)),
-        ],
-      ),
-    ),
-    body: Column(
-      children: [
-        _buildFilterChips(),
-        Expanded(
-          child: TabBarView(
+  Widget build(BuildContext context) {
+    // Listen for task completion celebrations
+    return BlocListener<TaskBloc, TaskState>(
+      listener: (context, state) {
+        if (state is TaskLoaded && state.showCompletionAnimation && state.completedTaskId != null) {
+          final taskId = state.completedTaskId!;
+          final xpReward = state.xpRewards[taskId] ?? 0;
+          final streakBonus = state.streakBonuses[taskId] ?? 0;
+          
+          // Total XP gained
+          final totalXPGained = xpReward + streakBonus;
+          
+          // Check if this is a streak milestone (multiple of 7)
+          final completedTask = state.tasks.firstWhere(
+            (task) => task.id == taskId,
+            orElse: () => Task.empty(),
+          );
+          
+          final isStreakMilestone = completedTask.streakCount > 0 && 
+              completedTask.streakCount % 7 == 0;
+          
+          // Show celebration
+          celebrateTaskCompletion(
+            xpGained: totalXPGained,
+            isStreakMilestone: isStreakMilestone,
+            streakCount: completedTask.streakCount,
+          );
+          
+          // Clear the animation state after a short delay
+          Future.delayed(const Duration(seconds: 1), () {
+            if (context.mounted) {
+              context.read<TaskBloc>().add(TaskCompletionAnimationCompleted(taskId: taskId));
+            }
+          });
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Tasks'),
+          centerTitle: true,
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          elevation: 0,
+          automaticallyImplyLeading: false,
+          bottom: TabBar(
             controller: _tabController,
-            children: [
-              _buildTaskList(TaskType.daily),
-              _buildTaskList(TaskType.weekly),
-              _buildTaskList(TaskType.longTerm),
+            tabs: const [
+              Tab(text: 'Daily', icon: Icon(Icons.today)),
+              Tab(text: 'Weekly', icon: Icon(Icons.view_week)),
+              Tab(text: 'Long-term', icon: Icon(Icons.flag)),
             ],
           ),
         ),
-      ],
-    ),
-    floatingActionButton: FloatingActionButton(
-      onPressed: _showAddTaskDialog,
-      child: const Icon(Icons.add),
-    ),
-  );
+        body: Column(
+          children: [
+            _buildFilterChips(),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildTaskList(TaskType.daily),
+                  _buildTaskList(TaskType.weekly),
+                  _buildTaskList(TaskType.longTerm),
+                ],
+              ),
+            ),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: _showAddTaskDialog,
+          child: const Icon(Icons.add),
+        ),
+      ),
+    );
+  }
 
   Widget _buildFilterChips() => Container(
     padding: const EdgeInsets.all(16),

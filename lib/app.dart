@@ -4,12 +4,18 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'data/database/database.dart';
 import 'data/repositories/auth_repository.dart';
+import 'data/repositories/avatar_repository.dart';
+import 'data/repositories/progress_repository.dart';
 import 'data/repositories/task_repository.dart';
+import 'data/repositories/achievement_repository.dart';
 import 'features/auth/screens/auth_wrapper.dart';
 import 'shared/blocs/auth/auth_bloc.dart';
 import 'shared/blocs/auth/auth_event.dart';
+import 'shared/blocs/avatar/avatar_bloc_exports.dart';
 import 'shared/blocs/navigation/navigation_cubit.dart';
+import 'shared/blocs/progress/progress_bloc_exports.dart';
 import 'shared/blocs/task/task_bloc_exports.dart';
+import 'shared/blocs/achievement/achievement_bloc_exports.dart';
 import 'shared/blocs/theme/theme_barrel.dart';
 import 'shared/themes/lifexp_theme.dart';
 
@@ -24,6 +30,9 @@ class LifeExpApp extends StatelessWidget {
     final database = LifeXPDatabase();
     final taskRepository = TaskRepository(database: database);
     final authRepository = AuthRepository();
+    final progressRepository = ProgressRepository(database: database);
+    final avatarRepository = AvatarRepository(database: database);
+    final achievementRepository = AchievementRepository(database: database);
 
     return MultiBlocProvider(
       providers: [
@@ -36,6 +45,15 @@ class LifeExpApp extends StatelessWidget {
         ),
         BlocProvider<TaskBloc>(
           create: (_) => TaskBloc(taskRepository: taskRepository),
+        ),
+        BlocProvider<ProgressBloc>(
+          create: (_) => ProgressBloc(progressRepository: progressRepository),
+        ),
+        BlocProvider<AvatarBloc>(
+          create: (_) => AvatarBloc(avatarRepository: avatarRepository),
+        ),
+        BlocProvider<AchievementBloc>(
+          create: (_) => AchievementBloc(achievementRepository: achievementRepository),
         ),
       ],
       child: BlocBuilder<ThemeBloc, ThemeState>(
