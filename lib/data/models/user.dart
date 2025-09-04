@@ -1,6 +1,13 @@
 import 'package:equatable/equatable.dart';
 
 /// User model for authentication and profile data
+///
+/// Represents an authenticated user with profile information and progress statistics.
+/// This model combines Firebase Auth user data with additional gamification attributes
+/// like level, XP, and streak information.
+///
+/// Users progress through levels by earning XP from completing tasks, and maintain
+/// streaks by completing tasks consistently.
 class User extends Equatable {
   const User({
     required this.id,

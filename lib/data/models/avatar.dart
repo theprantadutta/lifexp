@@ -1,6 +1,13 @@
 import 'package:equatable/equatable.dart';
 
 /// Represents the user's avatar with progression system
+///
+/// The avatar system provides a gamified representation of user progress with
+/// attributes that grow as users complete tasks and gain XP. Avatars level up
+/// based on accumulated XP and gain attribute points that can be allocated to
+/// strength, wisdom, and intelligence.
+///
+/// Users can customize their avatar's appearance and unlock items as they progress.
 class Avatar extends Equatable {
   const Avatar({
     required this.id,

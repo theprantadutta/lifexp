@@ -10,6 +10,8 @@ import 'package:uuid/uuid.dart' as uuid;
 part 'daos/achievement_dao.dart';
 // Import DAOs
 part 'daos/avatar_dao.dart';
+part 'daos/habit_dao.dart';
+part 'daos/goal_dao.dart';
 part 'daos/progress_dao.dart';
 part 'daos/task_dao.dart';
 part 'daos/world_dao.dart';
@@ -17,6 +19,8 @@ part 'daos/world_dao.dart';
 part 'database.g.dart';
 part 'tables/achievements_table.dart';
 part 'tables/avatars_table.dart';
+part 'tables/habits_table.dart';
+part 'tables/goals_table.dart';
 part 'tables/progress_entries_table.dart';
 part 'tables/tasks_table.dart';
 // Import table definitions
@@ -25,8 +29,8 @@ part 'tables/world_tiles_table.dart';
 
 /// Main database class for LifeXP app
 @DriftDatabase(
-  tables: [Users, Avatars, Tasks, Achievements, WorldTiles, ProgressEntries],
-  daos: [AvatarDao, TaskDao, AchievementDao, WorldDao, ProgressDao],
+  tables: [Users, Avatars, Tasks, Achievements, WorldTiles, ProgressEntries, Habits, Goals],
+  daos: [AvatarDao, TaskDao, AchievementDao, WorldDao, ProgressDao, HabitDao, GoalDao],
 )
 class LifeXPDatabase extends _$LifeXPDatabase {
   LifeXPDatabase() : super(_openConnection());
@@ -35,7 +39,7 @@ class LifeXPDatabase extends _$LifeXPDatabase {
   LifeXPDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2; // Updated schema version
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -46,8 +50,8 @@ class LifeXPDatabase extends _$LifeXPDatabase {
     onUpgrade: (m, from, to) async {
       // Handle future migrations here
       if (from < 2) {
-        // Example migration for version 2
-        // await m.addColumn(tasks, tasks.newColumn);
+        // Add new indexes for better performance
+        await _createAdditionalIndexes(m);
       }
     },
     beforeOpen: (details) async {
@@ -59,6 +63,9 @@ class LifeXPDatabase extends _$LifeXPDatabase {
       await customStatement('PRAGMA synchronous = NORMAL');
       await customStatement('PRAGMA cache_size = 10000');
       await customStatement('PRAGMA temp_store = MEMORY');
+      
+      // Enable query planning optimizations
+      await customStatement('PRAGMA optimize');
     },
   );
 
@@ -165,6 +172,113 @@ class LifeXPDatabase extends _$LifeXPDatabase {
             '(category)',
       ),
     );
+    
+    // Habit indexes
+    await m.createIndex(
+      Index(
+        'idx_habits_user_id',
+        'CREATE INDEX idx_habits_user_id ON habits (user_id)',
+      ),
+    );
+    await m.createIndex(
+      Index(
+        'idx_habits_category',
+        'CREATE INDEX idx_habits_category ON habits (category)',
+      ),
+    );
+    await m.createIndex(
+      Index(
+        'idx_habits_frequency',
+        'CREATE INDEX idx_habits_frequency ON habits (frequency)',
+      ),
+    );
+    await m.createIndex(
+      Index(
+        'idx_habits_completed_today',
+        'CREATE INDEX idx_habits_completed_today ON habits (is_completed_today)',
+      ),
+    );
+    
+    // Goal indexes
+    await m.createIndex(
+      Index(
+        'idx_goals_user_id',
+        'CREATE INDEX idx_goals_user_id ON goals (user_id)',
+      ),
+    );
+    await m.createIndex(
+      Index(
+        'idx_goals_category',
+        'CREATE INDEX idx_goals_category ON goals (category)',
+      ),
+    );
+    await m.createIndex(
+      Index(
+        'idx_goals_priority',
+        'CREATE INDEX idx_goals_priority ON goals (priority)',
+      ),
+    );
+    await m.createIndex(
+      Index(
+        'idx_goals_status',
+        'CREATE INDEX idx_goals_status ON goals (status)',
+      ),
+    );
+    await m.createIndex(
+      Index(
+        'idx_goals_deadline',
+        'CREATE INDEX idx_goals_deadline ON goals (deadline)',
+      ),
+    );
+  }
+
+  /// Creates additional indexes for better performance in version 2
+  Future<void> _createAdditionalIndexes(Migrator m) async {
+    // Additional task indexes for better performance
+    await m.createIndex(
+      Index(
+        'idx_tasks_user_completed_due',
+        'CREATE INDEX idx_tasks_user_completed_due ON tasks (user_id, is_completed, due_date)',
+      ),
+    );
+    
+    await m.createIndex(
+      Index(
+        'idx_tasks_user_category_completed',
+        'CREATE INDEX idx_tasks_user_category_completed ON tasks (user_id, category, is_completed)',
+      ),
+    );
+    
+    // Additional habit indexes
+    await m.createIndex(
+      Index(
+        'idx_habits_user_completed_streak',
+        'CREATE INDEX idx_habits_user_completed_streak ON habits (user_id, is_completed_today, streak_count)',
+      ),
+    );
+    
+    // Additional goal indexes
+    await m.createIndex(
+      Index(
+        'idx_goals_user_status_deadline',
+        'CREATE INDEX idx_goals_user_status_deadline ON goals (user_id, status, deadline)',
+      ),
+    );
+    
+    await m.createIndex(
+      Index(
+        'idx_goals_user_priority_status',
+        'CREATE INDEX idx_goals_user_priority_status ON goals (user_id, priority, status)',
+      ),
+    );
+    
+    // Additional progress entries indexes
+    await m.createIndex(
+      Index(
+        'idx_progress_entries_user_date_category',
+        'CREATE INDEX idx_progress_entries_user_date_category ON progress_entries (user_id, date, category)',
+      ),
+    );
   }
 
   /// Validates database constraints
@@ -209,6 +323,8 @@ class LifeXPDatabase extends _$LifeXPDatabase {
       await delete(progressEntries).go();
       await delete(worldTiles).go();
       await delete(achievements).go();
+      await delete(goals).go();
+      await delete(habits).go();
       await delete(tasks).go();
       await delete(avatars).go();
       await delete(users).go();
@@ -225,6 +341,8 @@ class LifeXPDatabase extends _$LifeXPDatabase {
     stats['achievements'] = await achievements.count().getSingle();
     stats['world_tiles'] = await worldTiles.count().getSingle();
     stats['progress_entries'] = await progressEntries.count().getSingle();
+    stats['habits'] = await habits.count().getSingle();
+    stats['goals'] = await goals.count().getSingle();
 
     return stats;
   }

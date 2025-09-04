@@ -4,6 +4,7 @@ import 'dart:developer' as developer;
 
 import 'package:drift/drift.dart';
 
+import '../../shared/services/lru_cache_service.dart';
 import '../../shared/services/offline_manager.dart';
 import '../database/database.dart';
 import '../models/avatar.dart';
@@ -20,12 +21,16 @@ class AvatarRepository {
   final LifeXPDatabase _database;
   final OfflineManager _offlineManager;
 
-  // Cache for frequently accessed avatar data
-  final Map<String, Avatar> _avatarCache = {};
-  final Map<String, DateTime> _cacheTimestamps = {};
+  // LRU Cache for avatar data
+  final _avatarCache = LRUCache<String, Avatar>(100); // Max 100 avatars
+  final _avatarByUserCache = LRUCache<String, Avatar>(100); // Max 100 user mappings
+  final _statsCache = LRUCache<String, Map<String, dynamic>>(50); // Max 50 stats entries
 
   // Cache expiration time (5 minutes)
   static const Duration _cacheExpiration = Duration(minutes: 5);
+
+  // Cache timestamps for expiration tracking
+  final Map<String, DateTime> _cacheTimestamps = {};
 
   // Stream controllers for real-time updates
   final Map<String, StreamController<Avatar>> _avatarStreamControllers = {};
@@ -323,68 +328,92 @@ class AvatarRepository {
 
   /// Gets cached avatar by user ID
   Avatar? _getCachedAvatar(String userId) {
-    final cacheKey = 'user_$userId';
-    if (_avatarCache.containsKey(cacheKey) && _isCacheValid(cacheKey)) {
-      return _avatarCache[cacheKey];
+    // Check if cache has expired
+    final timestamp = _cacheTimestamps[userId];
+    if (timestamp != null && 
+        DateTime.now().difference(timestamp) > _cacheExpiration) {
+      // Cache expired, remove it
+      _avatarByUserCache.remove(userId);
+      _cacheTimestamps.remove(userId);
+      return null;
     }
-    return null;
+    
+    // Try to get from LRU cache
+    return _avatarByUserCache.get(userId);
   }
 
-  /// Gets cached avatar by avatar ID
+  /// Gets cached avatar by ID
   Avatar? _getCachedAvatarById(String avatarId) {
-    final cacheKey = 'avatar_$avatarId';
-    if (_avatarCache.containsKey(cacheKey) && _isCacheValid(cacheKey)) {
-      return _avatarCache[cacheKey];
+    // Check if cache has expired
+    final timestamp = _cacheTimestamps[avatarId];
+    if (timestamp != null && 
+        DateTime.now().difference(timestamp) > _cacheExpiration) {
+      // Cache expired, remove it
+      _avatarCache.remove(avatarId);
+      _cacheTimestamps.remove(avatarId);
+      return null;
     }
-    return null;
+    
+    // Try to get from LRU cache
+    return _avatarCache.get(avatarId);
   }
 
   /// Caches avatar by user ID
   void _cacheAvatar(String userId, Avatar avatar) {
-    final cacheKey = 'user_$userId';
-    _avatarCache[cacheKey] = avatar;
-    _cacheTimestamps[cacheKey] = DateTime.now();
+    _avatarByUserCache.put(userId, avatar);
+    _avatarCache.put(avatar.id, avatar);
+    _cacheTimestamps[userId] = DateTime.now();
+    _cacheTimestamps[avatar.id] = DateTime.now();
   }
 
-  /// Caches avatar by avatar ID
+  /// Caches avatar by ID
   void _cacheAvatarById(String avatarId, Avatar avatar) {
-    final cacheKey = 'avatar_$avatarId';
-    _avatarCache[cacheKey] = avatar;
-    _cacheTimestamps[cacheKey] = DateTime.now();
+    _avatarCache.put(avatarId, avatar);
+    _cacheTimestamps[avatarId] = DateTime.now();
   }
 
-  /// Updates cache for avatar (both user and avatar ID keys)
+  /// Updates cache for avatar
   void _updateCacheForAvatar(Avatar avatar) {
-    // We need to find the user ID from existing cache or database
-    // For now, just cache by avatar ID
-    _cacheAvatarById(avatar.id, avatar);
+    _avatarCache.put(avatar.id, avatar);
+    _cacheTimestamps[avatar.id] = DateTime.now();
   }
 
-  /// Checks if cache entry is still valid
-  bool _isCacheValid(String cacheKey) {
-    final timestamp = _cacheTimestamps[cacheKey];
-    if (timestamp == null) return false;
-    return DateTime.now().difference(timestamp) < _cacheExpiration;
-  }
-
-  /// Invalidates cache for specific avatar
+  /// Invalidates avatar cache
   void _invalidateAvatarCache(String avatarId) {
-    final avatarKey = 'avatar_$avatarId';
-    _avatarCache.remove(avatarKey);
-    _cacheTimestamps.remove(avatarKey);
+    _avatarCache.remove(avatarId);
+    _cacheTimestamps.remove(avatarId);
+    
+    // Also invalidate user cache entries
+    final userKeysToRemove = <String>[];
+    for (final key in _avatarByUserCache.keys) {
+      final avatar = _avatarByUserCache.get(key);
+      if (avatar != null && avatar.id == avatarId) {
+        userKeysToRemove.add(key);
+      }
+    }
+    for (final key in userKeysToRemove) {
+      _avatarByUserCache.remove(key);
+      _cacheTimestamps.remove(key);
+    }
   }
 
   /// Invalidates cache for specific user
   void _invalidateUserCache(String userId) {
-    final userKey = 'user_$userId';
-    _avatarCache.remove(userKey);
-    _cacheTimestamps.remove(userKey);
+    _avatarByUserCache.remove(userId);
+    _cacheTimestamps.remove(userId);
+  }
+
+  /// Invalidates all caches
+  void _invalidateAllCaches() {
+    _avatarCache.clear();
+    _avatarByUserCache.clear();
+    _statsCache.clear();
+    _cacheTimestamps.clear();
   }
 
   /// Clears all cache
   void _clearCache() {
-    _avatarCache.clear();
-    _cacheTimestamps.clear();
+    _invalidateAllCaches();
   }
 
   /// Notifies avatar update to stream listeners

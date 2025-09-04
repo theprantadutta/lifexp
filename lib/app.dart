@@ -9,6 +9,7 @@ import 'data/repositories/progress_repository.dart';
 import 'data/repositories/task_repository.dart';
 import 'data/repositories/achievement_repository.dart';
 import 'features/auth/screens/auth_wrapper.dart';
+import 'shared/blocs/analytics/analytics_bloc.dart';
 import 'shared/blocs/auth/auth_bloc.dart';
 import 'shared/blocs/auth/auth_event.dart';
 import 'shared/blocs/avatar/avatar_bloc_exports.dart';
@@ -54,6 +55,9 @@ class LifeExpApp extends StatelessWidget {
         ),
         BlocProvider<AchievementBloc>(
           create: (_) => AchievementBloc(achievementRepository: achievementRepository),
+        ),
+        BlocProvider<AnalyticsBloc>(
+          create: (_) => AnalyticsBloc(),
         ),
       ],
       child: BlocBuilder<ThemeBloc, ThemeState>(

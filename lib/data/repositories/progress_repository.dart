@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:drift/drift.dart';
 
+import '../../shared/services/lru_cache_service.dart';
 import '../database/database.dart';
 import '../models/progress.dart';
 
@@ -12,13 +13,17 @@ class ProgressRepository {
 
   final LifeXPDatabase _database;
 
-  // Cache for progress data
-  final Map<String, List<ProgressEntry>> _progressCache = {};
-  final Map<String, DateTime> _cacheTimestamps = {};
+  // LRU Cache for progress data
+  final _progressCache = LRUCache<String, List<ProgressEntry>>(100); // Max 100 user entries
+  final _singleProgressCache = LRUCache<String, ProgressEntry>(200); // Max 200 individual entries
+  final _statsCache = LRUCache<String, Map<String, dynamic>>(50); // Max 50 stats entries
 
   // Cache expiration time (5 minutes for progress data as it updates
   // frequently)
   static const Duration _cacheExpiration = Duration(minutes: 5);
+
+  // Cache timestamps for expiration tracking
+  final Map<String, DateTime> _cacheTimestamps = {};
 
   // Stream controllers for real-time updates
   final Map<String, StreamController<List<ProgressEntry>>>
@@ -502,18 +507,38 @@ class ProgressRepository {
 
   /// Gets cached progress entries for user
   List<ProgressEntry>? _getCachedProgressEntries(String userId) {
-    if (_progressCache.containsKey(userId) && _isCacheValid(userId)) {
-      return _progressCache[userId];
+    // Check if cache has expired
+    final timestamp = _cacheTimestamps[userId];
+    if (timestamp != null && 
+        DateTime.now().difference(timestamp) > _cacheExpiration) {
+      // Cache expired, remove it
+      _progressCache.remove(userId);
+      _cacheTimestamps.remove(userId);
+      return null;
     }
-    return null;
+    
+    // Try to get from LRU cache
+    return _progressCache.get(userId);
   }
 
   /// Gets cached entry by ID from any user's cache
   ProgressEntry? _getCachedEntryById(String entryId) {
-    for (final entries in _progressCache.values) {
-      final entry = entries.where((e) => e.id == entryId).firstOrNull;
-      if (entry != null) {
-        return entry;
+    // Try to get from single entry cache first
+    final cachedEntry = _singleProgressCache.get(entryId);
+    if (cachedEntry != null) {
+      return cachedEntry;
+    }
+    
+    // Check all user caches
+    for (final userId in _progressCache.keys) {
+      final entries = _progressCache.get(userId);
+      if (entries != null) {
+        final entry = entries.where((e) => e.id == entryId).firstOrNull;
+        if (entry != null) {
+          // Cache this individual entry for faster access next time
+          _singleProgressCache.put(entryId, entry);
+          return entry;
+        }
       }
     }
     return null;
@@ -521,17 +546,13 @@ class ProgressRepository {
 
   /// Caches progress entries for user
   void _cacheProgressEntries(String userId, List<ProgressEntry> entries) {
-    _progressCache[userId] = entries;
+    _progressCache.put(userId, entries);
     _cacheTimestamps[userId] = DateTime.now();
-  }
-
-  /// Checks if cache is valid
-  bool _isCacheValid(String userId) {
-    final timestamp = _cacheTimestamps[userId];
-    if (timestamp == null) {
-      return false;
+    
+    // Also cache individual entries for faster access
+    for (final entry in entries) {
+      _singleProgressCache.put(entry.id, entry);
     }
-    return DateTime.now().difference(timestamp) < _cacheExpiration;
   }
 
   /// Invalidates cache for specific user
@@ -540,10 +561,17 @@ class ProgressRepository {
     _cacheTimestamps.remove(userId);
   }
 
+  /// Invalidates all caches
+  void _invalidateAllCaches() {
+    _progressCache.clear();
+    _singleProgressCache.clear();
+    _statsCache.clear();
+    _cacheTimestamps.clear();
+  }
+
   /// Clears all cache
   void _clearCache() {
-    _progressCache.clear();
-    _cacheTimestamps.clear();
+    _invalidateAllCaches();
   }
 
   /// Notifies progress update

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../features/analytics/screens/analytics_dashboard_screen.dart';
 import '../../../features/home/screens/home_screen.dart';
 import '../../../features/profile/screens/profile_screen.dart';
 import '../../../features/progress/screens/progress_screen.dart';
@@ -27,6 +28,7 @@ class AppShell extends StatelessWidget {
               HomeScreen(),
               TasksScreen(),
               ProgressScreen(),
+              AnalyticsDashboardScreen(),
               ProfileScreen(),
             ],
           );

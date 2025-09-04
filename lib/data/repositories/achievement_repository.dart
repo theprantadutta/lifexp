@@ -4,6 +4,7 @@ import 'dart:developer' as developer;
 
 import 'package:drift/drift.dart';
 
+import '../../shared/services/lru_cache_service.dart';
 import '../../shared/services/offline_manager.dart';
 import '../database/database.dart';
 import '../models/achievement.dart';
@@ -20,12 +21,16 @@ class AchievementRepository {
   final LifeXPDatabase _database;
   final OfflineManager _offlineManager;
 
-  // Cache for achievement data
-  final Map<String, List<Achievement>> _achievementCache = {};
-  final Map<String, DateTime> _cacheTimestamps = {};
+  // LRU Cache for achievement data
+  final _achievementCache = LRUCache<String, List<Achievement>>(100); // Max 100 user entries
+  final _singleAchievementCache = LRUCache<String, Achievement>(200); // Max 200 individual achievements
+  final _statsCache = LRUCache<String, Map<String, dynamic>>(50); // Max 50 stats entries
 
   // Cache expiration time (10 minutes for achievements as they change less frequently)
   static const Duration _cacheExpiration = Duration(minutes: 10);
+
+  // Cache timestamps for expiration tracking
+  final Map<String, DateTime> _cacheTimestamps = {};
 
   // Stream controllers for real-time updates
   final Map<String, StreamController<List<Achievement>>>
@@ -436,34 +441,52 @@ class AchievementRepository {
 
   /// Gets cached achievements for user
   List<Achievement>? _getCachedAchievements(String userId) {
-    if (_achievementCache.containsKey(userId) && _isCacheValid(userId)) {
-      return _achievementCache[userId];
+    // Check if cache has expired
+    final timestamp = _cacheTimestamps[userId];
+    if (timestamp != null && 
+        DateTime.now().difference(timestamp) > _cacheExpiration) {
+      // Cache expired, remove it
+      _achievementCache.remove(userId);
+      _cacheTimestamps.remove(userId);
+      return null;
     }
-    return null;
+    
+    // Try to get from LRU cache
+    return _achievementCache.get(userId);
   }
 
   /// Gets cached achievement by ID from any user's cache
   Achievement? _getCachedAchievementById(String achievementId) {
-    for (final achievements in _achievementCache.values) {
-      final achievement = achievements
-          .where((a) => a.id == achievementId)
-          .firstOrNull;
-      if (achievement != null) return achievement;
+    // Try to get from single achievement cache first
+    final cachedAchievement = _singleAchievementCache.get(achievementId);
+    if (cachedAchievement != null) {
+      return cachedAchievement;
+    }
+    
+    // Check all user caches
+    for (final userId in _achievementCache.keys) {
+      final achievements = _achievementCache.get(userId);
+      if (achievements != null) {
+        final achievement = achievements.where((a) => a.id == achievementId).firstOrNull;
+        if (achievement != null) {
+          // Cache this individual achievement for faster access next time
+          _singleAchievementCache.put(achievementId, achievement);
+          return achievement;
+        }
+      }
     }
     return null;
   }
 
   /// Caches achievements for user
   void _cacheAchievements(String userId, List<Achievement> achievements) {
-    _achievementCache[userId] = achievements;
+    _achievementCache.put(userId, achievements);
     _cacheTimestamps[userId] = DateTime.now();
-  }
-
-  /// Checks if cache is valid
-  bool _isCacheValid(String userId) {
-    final timestamp = _cacheTimestamps[userId];
-    if (timestamp == null) return false;
-    return DateTime.now().difference(timestamp) < _cacheExpiration;
+    
+    // Also cache individual achievements for faster access
+    for (final achievement in achievements) {
+      _singleAchievementCache.put(achievement.id, achievement);
+    }
   }
 
   /// Invalidates cache for specific user
@@ -475,13 +498,14 @@ class AchievementRepository {
   /// Invalidates all caches
   void _invalidateAllCaches() {
     _achievementCache.clear();
+    _singleAchievementCache.clear();
+    _statsCache.clear();
     _cacheTimestamps.clear();
   }
 
   /// Clears all cache
   void _clearCache() {
-    _achievementCache.clear();
-    _cacheTimestamps.clear();
+    _invalidateAllCaches();
   }
 
   /// Notifies achievement unlock

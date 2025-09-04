@@ -4,6 +4,7 @@ import 'dart:developer' as developer;
 import 'package:drift/drift.dart';
 
 import '../../shared/services/offline_data_manager.dart';
+import '../../shared/services/lru_cache_service.dart';
 import '../database/database.dart';
 import '../models/task.dart';
 
@@ -18,12 +19,16 @@ class TaskRepository {
   final LifeXPDatabase _database;
   final OfflineDataManager? _offlineManager;
 
-  // Cache for frequently accessed task data
-  final Map<String, List<Task>> _taskCache = {};
-  final Map<String, DateTime> _cacheTimestamps = {};
+  // LRU Cache for frequently accessed task data
+  final _taskCache = LRUCache<String, List<Task>>(100); // Max 100 user entries
+  final _singleTaskCache = LRUCache<String, Task>(200); // Max 200 individual tasks
+  final _statsCache = LRUCache<String, Map<String, dynamic>>(50); // Max 50 stats entries
 
   // Cache expiration time (3 minutes for tasks as they change frequently)
   static const Duration _cacheExpiration = Duration(minutes: 3);
+
+  // Cache timestamps for expiration tracking
+  final Map<String, DateTime> _cacheTimestamps = {};
 
   // Stream controllers for real-time updates
   final Map<String, StreamController<List<Task>>> _taskStreamControllers = {};
@@ -552,32 +557,52 @@ class TaskRepository {
 
   /// Gets cached tasks for user
   List<Task>? _getCachedTasks(String userId) {
-    if (_taskCache.containsKey(userId) && _isCacheValid(userId)) {
-      return _taskCache[userId];
+    // Check if cache has expired
+    final timestamp = _cacheTimestamps[userId];
+    if (timestamp != null && 
+        DateTime.now().difference(timestamp) > _cacheExpiration) {
+      // Cache expired, remove it
+      _taskCache.remove(userId);
+      _cacheTimestamps.remove(userId);
+      return null;
     }
-    return null;
+    
+    // Try to get from LRU cache
+    return _taskCache.get(userId);
   }
 
   /// Gets cached task by ID from any user's cache
   Task? _getCachedTaskById(String taskId) {
-    for (final tasks in _taskCache.values) {
-      final task = tasks.where((t) => t.id == taskId).firstOrNull;
-      if (task != null) return task;
+    // Try to get from single task cache first
+    final cachedTask = _singleTaskCache.get(taskId);
+    if (cachedTask != null) {
+      return cachedTask;
+    }
+    
+    // Check all user caches
+    for (final userId in _taskCache.keys) {
+      final tasks = _taskCache.get(userId);
+      if (tasks != null) {
+        final task = tasks.where((t) => t.id == taskId).firstOrNull;
+        if (task != null) {
+          // Cache this individual task for faster access next time
+          _singleTaskCache.put(taskId, task);
+          return task;
+        }
+      }
     }
     return null;
   }
 
   /// Caches tasks for user
   void _cacheTasks(String userId, List<Task> tasks) {
-    _taskCache[userId] = tasks;
+    _taskCache.put(userId, tasks);
     _cacheTimestamps[userId] = DateTime.now();
-  }
-
-  /// Checks if cache is valid
-  bool _isCacheValid(String userId) {
-    final timestamp = _cacheTimestamps[userId];
-    if (timestamp == null) return false;
-    return DateTime.now().difference(timestamp) < _cacheExpiration;
+    
+    // Also cache individual tasks for faster access
+    for (final task in tasks) {
+      _singleTaskCache.put(task.id, task);
+    }
   }
 
   /// Invalidates cache for specific user
@@ -589,13 +614,14 @@ class TaskRepository {
   /// Invalidates all caches
   void _invalidateAllCaches() {
     _taskCache.clear();
+    _singleTaskCache.clear();
+    _statsCache.clear();
     _cacheTimestamps.clear();
   }
 
   /// Clears all cache
   void _clearCache() {
-    _taskCache.clear();
-    _cacheTimestamps.clear();
+    _invalidateAllCaches();
   }
 
   /// Checks if task is within grace period for streak maintenance

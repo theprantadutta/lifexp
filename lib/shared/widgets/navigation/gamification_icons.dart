@@ -12,8 +12,8 @@ class GamificationIcons {
   static const IconData progress = Icons.trending_up_rounded;
   static const IconData progressOutlined = Icons.trending_up_outlined;
 
-  static const IconData world = Icons.explore_rounded;
-  static const IconData worldOutlined = Icons.explore_outlined;
+  static const IconData analytics = Icons.analytics_rounded;
+  static const IconData analyticsOutlined = Icons.analytics_outlined;
 
   static const IconData profile = Icons.account_circle_rounded;
   static const IconData profileOutlined = Icons.account_circle_outlined;

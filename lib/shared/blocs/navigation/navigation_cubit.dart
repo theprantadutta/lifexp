@@ -51,7 +51,7 @@ class NavigationCubit extends Cubit<NavigationState> {
       case 2:
         return '/progress';
       case 3:
-        return '/world';
+        return '/analytics';
       case 4:
         return '/profile';
       default:
@@ -67,7 +67,7 @@ class NavigationCubit extends Cubit<NavigationState> {
         return 1;
       case '/progress':
         return 2;
-      case '/world':
+      case '/analytics':
         return 3;
       case '/profile':
         return 4;
@@ -86,7 +86,7 @@ class NavigationCubit extends Cubit<NavigationState> {
       case 2:
         return 'Progress';
       case 3:
-        return 'World';
+        return 'Analytics';
       case 4:
         return 'Profile';
       default:
@@ -103,8 +103,8 @@ class NavigationCubit extends Cubit<NavigationState> {
   /// Check if current tab is progress
   bool get isProgress => state.currentIndex == 2;
 
-  /// Check if current tab is world
-  bool get isWorld => state.currentIndex == 3;
+  /// Check if current tab is analytics
+  bool get isAnalytics => state.currentIndex == 3;
 
   /// Check if current tab is profile
   bool get isProfile => state.currentIndex == 4;
@@ -113,6 +113,6 @@ class NavigationCubit extends Cubit<NavigationState> {
   void navigateToHome() => changeTab(0);
   void navigateToTasks() => changeTab(1);
   void navigateToProgress() => changeTab(2);
-  void navigateToWorld() => changeTab(3);
+  void navigateToAnalytics() => changeTab(3);
   void navigateToProfile() => changeTab(4);
 }

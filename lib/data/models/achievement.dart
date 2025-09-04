@@ -1,6 +1,13 @@
 import 'package:equatable/equatable.dart';
 
-/// Represents an achievement that users can unlock
+/// Represents an achievement that can be unlocked by users
+///
+/// Achievements provide additional gamification elements by rewarding users for
+/// reaching specific milestones, maintaining streaks, completing tasks in categories,
+/// or reaching level thresholds.
+///
+/// Each achievement has specific criteria that must be met for unlocking, and can
+/// provide XP rewards or other benefits when unlocked.
 class Achievement extends Equatable {
   const Achievement({
     required this.id,

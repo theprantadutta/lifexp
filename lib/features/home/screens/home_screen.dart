@@ -354,7 +354,7 @@ class HomeScreen extends StatelessWidget {
                 subtitle: 'Explore map',
                 onTap: () {
                   // Navigate to world
-                  context.read<NavigationCubit>().navigateToWorld();
+                  context.read<NavigationCubit>().navigateToAnalytics();
                 },
               ),
             ),

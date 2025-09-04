@@ -1,6 +1,13 @@
 import 'package:equatable/equatable.dart';
 
 /// Represents a progress entry for tracking user analytics
+///
+/// Progress entries track daily user activity including XP gained, tasks completed,
+/// streak maintenance, and category breakdowns. These entries form the basis for
+/// all analytics, charts, and progress visualization in the application.
+///
+/// Each entry is associated with a specific date and user, and contains aggregated
+/// data about that day's productivity and achievements.
 class ProgressEntry extends Equatable {
   const ProgressEntry({
     required this.id,

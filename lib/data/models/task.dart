@@ -1,6 +1,14 @@
 import 'package:equatable/equatable.dart';
 
 /// Represents a task that users can complete to gain XP
+///
+/// Tasks are the core building blocks of the LifeXP system. Users create tasks
+/// in different categories and complete them to earn experience points (XP),
+/// maintain streaks, and unlock achievements.
+///
+/// Tasks can be daily, weekly, or long-term, and have varying difficulty levels
+/// that affect the XP reward. The system automatically calculates streak bonuses
+/// and other rewards based on completion patterns.
 class Task extends Equatable {
   const Task({
     required this.id,
