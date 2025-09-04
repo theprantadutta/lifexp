@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../data/models/user.dart';
@@ -17,6 +18,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthCheckRequested>(_onAuthStatusRequested); // Use same handler as AuthStatusRequested
     on<AuthSignUpRequested>(_onAuthSignUpRequested);
     on<AuthSignInRequested>(_onAuthSignInRequested);
+    on<LoginRequested>(_onLoginRequested);
     on<AuthSignOutRequested>(_onAuthSignOutRequested);
     on<AuthPasswordResetRequested>(_onAuthPasswordResetRequested);
     on<AuthProfileUpdateRequested>(_onAuthProfileUpdateRequested);
@@ -113,6 +115,44 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+  /// Handles login requests (alternative event name)
+  Future<void> _onLoginRequested(
+    LoginRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(const AuthSignInLoading());
+
+    try {
+      developer.log('Processing login request for ${event.email}', name: 'AuthBloc');
+
+      final user = await _authRepository.signIn(
+        email: event.email,
+        password: event.password,
+      );
+
+      developer.log('Login successful for user ${user.id}', name: 'AuthBloc');
+      // The auth state stream will emit AuthAuthenticated
+    } on firebase_auth.FirebaseAuthException catch (e, stackTrace) {
+      developer.log('Firebase Auth login error: ${e.code} - ${e.message}', name: 'AuthBloc', error: e, stackTrace: stackTrace);
+
+      emit(
+        AuthError(
+          message: _handleAuthErrorMessage(e),
+          isSignIn: true,
+        ),
+      );
+    } on Exception catch (e, stackTrace) {
+      developer.log('Login error: $e', name: 'AuthBloc', error: e, stackTrace: stackTrace);
+
+      emit(
+        AuthError(
+          message: e.toString().replaceFirst('Exception: ', ''),
+          isSignIn: true,
+        ),
+      );
+    }
+  }
+
   /// Handles sign out requests
   Future<void> _onAuthSignOutRequested(
     AuthSignOutRequested event,
@@ -195,6 +235,29 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) {
     emit(AuthError(message: event.message));
+  }
+
+  /// Helper method to handle authentication error messages
+  String _handleAuthErrorMessage(dynamic error) {
+    if (error is firebase_auth.FirebaseAuthException) {
+      switch (error.code) {
+        case 'user-not-found':
+          return 'No account found with this email address.';
+        case 'wrong-password':
+          return 'Incorrect password. Please try again.';
+        case 'invalid-email':
+          return 'Please enter a valid email address.';
+        case 'user-disabled':
+          return 'This account has been disabled.';
+        case 'too-many-requests':
+          return 'Too many failed attempts. Please try again later.';
+        case 'network-request-failed':
+          return 'Network error. Please check your connection and try again.';
+        default:
+          return 'Authentication failed. Please try again.';
+      }
+    }
+    return error.toString().replaceFirst('Exception: ', '');
   }
 
   @override
